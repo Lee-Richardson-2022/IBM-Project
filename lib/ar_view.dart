@@ -10,7 +10,7 @@ import 'package:ar_flutter_plugin/models/ar_node.dart';
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
-
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class ARViewPage extends StatefulWidget {
   const ARViewPage({super.key});
@@ -68,11 +68,12 @@ class _ARViewPageState extends State<ARViewPage> {
   }
 
   void _addARObject() async {
-    const modelFilePath = 'assets/models/Monkey.glb';
+    final cacheManager = DefaultCacheManager();
+    final file = await cacheManager.getSingleFile('assets/models/Monkey.glb');
 
     final node = ARNode(
       type: NodeType.webGLB,
-      uri: modelFilePath,
+      uri: file.path,
       position: vector.Vector3(0, 0, -1),
       scale: vector.Vector3.all(0.5),
     );
