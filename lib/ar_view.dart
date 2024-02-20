@@ -10,8 +10,7 @@ import 'package:ar_flutter_plugin/models/ar_node.dart';
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 
 class ARViewPage extends StatefulWidget {
   const ARViewPage({super.key});
@@ -45,7 +44,7 @@ class _ARViewPageState extends State<ARViewPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _addARObject,
         tooltip: 'Add AR Object',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ), // This trailing comment was missing a closing bracket in your original snippet
     );
   }
@@ -69,12 +68,11 @@ class _ARViewPageState extends State<ARViewPage> {
   }
 
   void _addARObject() async {
-    final cacheManager = DefaultCacheManager();
-    final file = await cacheManager.getSingleFile('assets/models/Monkey.glb');
+    const modelFilePath = 'assets/models/Monkey.glb';
 
     final node = ARNode(
       type: NodeType.webGLB,
-      uri: file.path,
+      uri: modelFilePath,
       position: vector.Vector3(0, 0, -1),
       scale: vector.Vector3.all(0.5),
     );
@@ -82,11 +80,6 @@ class _ARViewPageState extends State<ARViewPage> {
   }
 
   void _addARObjectAtHit(ARHitTestResult hitTestResult) {
-    final position = vector.Vector3(
-      hitTestResult.worldTransform.getColumn(3).x,
-      hitTestResult.worldTransform.getColumn(3).y,
-      hitTestResult.worldTransform.getColumn(3).z,
-    );
     final node = ARNode(
       type: NodeType.webGLB,
       uri: "assets/models/Monkey.glb",
