@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-// Import the ARViewPage from ar_view.dart
-import 'ar_view.dart'; // Make sure this path matches the location of your ar_view.dart file
+import 'ar_view.dart'; // Import the ARViewPage from ar_view.dart
+import 'settings_page.dart'; // Import settings page
 
 void main() => runApp(MyApp());
 
@@ -21,8 +21,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   MobileScannerController cameraController = MobileScannerController();
+  int _selectedIndex = 0;
   bool hasNavigatedToARView = false; // Add this line
-
 
   @override
   Widget build(BuildContext context) {
@@ -34,36 +34,52 @@ class _HomeScreenState extends State<HomeScreen> {
           for (final barcode in barcodes) {
             final String? code = barcode.rawValue;
             debugPrint('Barcode found! $code');
-            if (!hasNavigatedToARView && code != null && code == "https://youtu.be/dQw4w9WgXcQ") {
-              setState(() {
-                hasNavigatedToARView = true; // Set to true to prevent multiple navigations
-                cameraController.stop();
-              });
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => ARViewPage()),
-              ).then((_) => setState(() { hasNavigatedToARView = false; })); // Reset on return
+            if (code != null && code == "https://youtu.be/dQw4w9WgXcQ") {
+              _navigateToARView();
+              cameraController.stop();
             }
           }
         },
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        notchMargin: 6.0,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.flash_on),
-              onPressed: () => cameraController.toggleTorch(),
-            ),
-            IconButton(
-              icon: Icon(Icons.camera_alt),
-              onPressed: () => cameraController.switchCamera(),
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.credit_card),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt),
+            label: 'Camera',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          )
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
+    );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      if (_selectedIndex == 2) {
+        _navigateToSettings();
+      }
+    });
+  }
+
+  void _navigateToARView() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => ARViewPage()),
+    );
+  }
+
+  void _navigateToSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => SettingsPage()),
     );
   }
 }
