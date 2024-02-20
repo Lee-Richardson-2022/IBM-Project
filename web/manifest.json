@@ -1,11 +1,11 @@
 {
-    "name": "ibm_project",
-    "short_name": "ibm_project",
+    "name": "ibm_test",
+    "short_name": "ibm_test",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "IBM group E project",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

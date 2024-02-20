@@ -1,6 +1,6 @@
-# ibm_project
+# ibm_test
 
-IBM group E project
+A new Flutter project.
 
 ## Getting Started
 
