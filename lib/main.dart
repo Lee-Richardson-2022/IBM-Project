@@ -23,6 +23,7 @@ class _ARCorePageState extends State<ARCorePage> {
   late ArCoreController arCoreController;
   ArCoreNode? currentNode;
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,10 +64,20 @@ class _ARCorePageState extends State<ARCorePage> {
 
   void _onPlaneTapHandler(List<ArCoreHitTestResult> hits) {
     if (hits.isNotEmpty) {
+
       final material = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
-      final avatar = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
+      final sphere = ArCoreSphere(materials: [material], radius: 0.05);
+
+      final childNode = ArCoreNode (
+        shape: sphere,
+        position: vector.Vector3(0.2, 0, 0),
+      );
+
+
+      final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
       final newNode = ArCoreNode(
-          shape: avatar,
+          children: [childNode],
+          shape: cylinder,
           position: hits.first.pose.translation
       );
 
