@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'ar_view.dart'; // Import the ARViewPage from ar_view.dart
-import 'settings_page.dart'; // Import settings page
+import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
+import 'package:vector_math/vector_math_64.dart' as vector;
 
 void main() => runApp(MyApp());
 
@@ -9,77 +8,73 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomeScreen(),
+      title: 'AR Core Example',
+      home: ARCorePage(),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class ARCorePage extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _ARCorePageState createState() => _ARCorePageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  MobileScannerController cameraController = MobileScannerController();
-  int _selectedIndex = 0;
-  bool hasNavigatedToARView = false; // Add this line
+class _ARCorePageState extends State<ARCorePage> {
+  late ArCoreController arCoreController;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MobileScanner(
-        controller: cameraController,
-        onDetect: (barcodeCapture) {
-          final List<Barcode> barcodes = barcodeCapture.barcodes;
-          for (final barcode in barcodes) {
-            final String? code = barcode.rawValue;
-            debugPrint('Barcode found! $code');
-            if (code != null && code == "https://youtu.be/dQw4w9WgXcQ") {
-              _navigateToARView();
-              cameraController.stop();
-            }
-          }
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.credit_card),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: 'Camera',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          )
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+      body: ArCoreView(
+        onArCoreViewCreated: _onArCoreViewCreated,
+        enableTapRecognizer: true,
       ),
     );
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      if (_selectedIndex == 2) {
-        _navigateToSettings();
-      }
-    });
+  void _onArCoreViewCreated(ArCoreController controller) {
+    arCoreController = controller;
+    arCoreController.onNodeTap = (name) => onTapHandler(name);
+    arCoreController.onPlaneTap = _onPlaneTapHandler;
   }
 
-  void _navigateToARView() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => ARViewPage()),
+  void _onPlaneTapHandler(List<ArCoreHitTestResult> hits) {
+    if (hits.isNotEmpty) {
+      final material = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
+      final avatar = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
+
+      final node = ArCoreNode(
+          shape: avatar,
+          position: hits.first.pose.translation
+      );
+      arCoreController.addArCoreNode(node);
+    }
+  }
+
+  // final material = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
+  // final sphere = ArCoreSphere(materials: [material], radius: 0.1);
+  // final node = ArCoreNode(
+  //     shape: sphere,
+  //     position: hits.first.pose.translation,
+
+  void onTapHandler(String name) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) =>
+          AlertDialog(content: Text('Node Tapped')),
     );
   }
 
-  void _navigateToSettings() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => SettingsPage()),
-    );
+  // void _addSphere(ArCoreController controller) {
+  //   final material = ArCoreMaterial(color: Colors.grey, metallic: 1.0);
+  //   final sphere = ArCoreCylinder(materials: [material], height: 0.05 , radius: 0.1 );
+  //   final node = ArCoreNode(shape: sphere, position: vector.Vector3(0, 0, -1));
+  //   controller.addArCoreNode(node);
+  // }
+
+  @override
+  void dispose() {
+    arCoreController.dispose();
+    super.dispose();
   }
 }
