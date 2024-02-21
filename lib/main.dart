@@ -65,18 +65,38 @@ class _ARCorePageState extends State<ARCorePage> {
   void _onPlaneTapHandler(List<ArCoreHitTestResult> hits) {
     if (hits.isNotEmpty) {
 
-      final material = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
-      final sphere = ArCoreSphere(materials: [material], radius: 0.05);
+      final redMaterial = ArCoreMaterial(color: Colors.red, reflectance: 1.0);
+      final redCylinder = ArCoreCylinder(materials: [redMaterial], radius: 0.01, height: 0.05);
 
-      final childNode = ArCoreNode (
-        shape: sphere,
-        position: vector.Vector3(0.2, 0, 0),
+      final blueMaterial = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
+      final blueCylinder = ArCoreCylinder(materials: [blueMaterial], radius: 0.01, height: 0.05);
+
+      final greenMaterial = ArCoreMaterial(color: Colors.green, reflectance: 1.0);
+      final greenCylinder = ArCoreCylinder(materials: [greenMaterial], radius: 0.01, height: 0.05);
+
+      final redButton = ArCoreNode (
+          shape: redCylinder,
+          position: vector.Vector3(-0.1, 0, 0),
+          rotation: vector.Vector4(1, 0, 0, 1),
+      );
+
+      final blueButton = ArCoreNode (
+          shape: blueCylinder,
+          position: vector.Vector3(0.1, 0, 0),
+          rotation: vector.Vector4(1, 0, 0, 1),
+      );
+
+      final greenButton = ArCoreNode (
+          shape: greenCylinder,
+          position: vector.Vector3(0, 0.1, 0),
+          rotation: vector.Vector4(1, 0, 0, 1),
       );
 
 
+      final material = ArCoreMaterial(color: Colors.grey, reflectance: 1.0);
       final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
       final newNode = ArCoreNode(
-          children: [childNode],
+          children: [redButton, blueButton, greenButton],
           shape: cylinder,
           position: hits.first.pose.translation
       );
@@ -100,8 +120,8 @@ class _ARCorePageState extends State<ARCorePage> {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) =>
-          AlertDialog(content: Text('Node Tapped')),
-    );
+          AlertDialog(content: Text('Node Tapped ' + name.toString()),
+    ));
   }
 
   // void _addSphere(ArCoreController controller) {

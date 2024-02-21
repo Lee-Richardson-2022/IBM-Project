@@ -1,11 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-sdk android:minSdkVersion="24" />
 
-    <!-- Indicates that app requires ARCore ("AR Required"). Ensures app is only
-         visible in the Google Play Store on devices that support ARCore.
-    -->
+    <uses-sdk android:minSdkVersion="24" />
     <uses-feature android:name="android.hardware.camera.ar" />
+
 
 
     <application
