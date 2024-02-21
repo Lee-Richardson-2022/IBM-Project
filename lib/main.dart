@@ -21,13 +21,36 @@ class ARCorePage extends StatefulWidget {
 
 class _ARCorePageState extends State<ARCorePage> {
   late ArCoreController arCoreController;
+  ArCoreNode? currentNode;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ArCoreView(
-        onArCoreViewCreated: _onArCoreViewCreated,
-        enableTapRecognizer: true,
+      body: Column(
+        children: [
+          Expanded(
+            child: ArCoreView(
+              onArCoreViewCreated: _onArCoreViewCreated,
+              enableTapRecognizer: true,
+            ),
+          ),
+          BottomNavigationBar(
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.credit_card),
+                label: 'History',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.camera_alt),
+                label: 'Camera',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              )
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -42,12 +65,17 @@ class _ARCorePageState extends State<ARCorePage> {
     if (hits.isNotEmpty) {
       final material = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
       final avatar = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
-
-      final node = ArCoreNode(
+      final newNode = ArCoreNode(
           shape: avatar,
           position: hits.first.pose.translation
       );
-      arCoreController.addArCoreNode(node);
+
+      if (currentNode != null) {
+        arCoreController.removeNode(nodeName: currentNode!.name);
+      }
+
+      arCoreController.addArCoreNode(newNode);
+      currentNode = newNode;
     }
   }
 
