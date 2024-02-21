@@ -23,7 +23,6 @@ class _ARCorePageState extends State<ARCorePage> {
   late ArCoreController arCoreController;
   ArCoreNode? currentNode;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,11 +63,11 @@ class _ARCorePageState extends State<ARCorePage> {
 
   void _onPlaneTapHandler(List<ArCoreHitTestResult> hits) {
     if (hits.isNotEmpty) {
-      createAvatar(hits.first.pose.translation, Colors.grey);
+      createAvatar(hits.first.pose.translation, Colors.grey, false);
     }
   }
 
-  void createAvatar(vector.Vector3 position, Color color) {
+  List<ArCoreNode> createButtons(){
     final redMaterial = ArCoreMaterial(color: Colors.red, reflectance: 1.0);
     final redCylinder = ArCoreCylinder(materials: [redMaterial], radius: 0.01, height: 0.05);
 
@@ -98,15 +97,28 @@ class _ARCorePageState extends State<ARCorePage> {
       position: vector.Vector3(0, 0.1, 0),
       rotation: vector.Vector4(1, 0, 0, 1),
     );
+    return [redButton, blueButton, greenButton];
+  }
+
+  void createAvatar(vector.Vector3 position, Color color, bool withButtons) {
 
     final material = ArCoreMaterial(color: color, reflectance: 1.0);
     final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
-    final newNode = ArCoreNode(
-        name: 'avatar',
-        children: [redButton, blueButton, greenButton],
-        shape: cylinder,
-        position: position
-    );
+    final newNode;
+    if (withButtons){
+       newNode = ArCoreNode(
+          name: 'avatar',
+          children: createButtons(),
+          shape: cylinder,
+          position: position
+      );
+    } else {
+      newNode = ArCoreNode(
+          name: 'avatar',
+          shape: cylinder,
+          position: position
+      );
+    }
 
     if (currentNode != null) {
       arCoreController.removeNode(nodeName: currentNode!.name);
@@ -119,12 +131,15 @@ class _ARCorePageState extends State<ARCorePage> {
   void changeColor(Color color) {
     arCoreController.removeNode(nodeName: currentNode!.name);
 
-    createAvatar(currentNode!.position!.value, color);
+    createAvatar(currentNode!.position!.value, color, true);
   }
 
   void onTapHandler(String name) {
     // Determine which cylinder was tapped
     switch (name) {
+      case "avatar":
+        createAvatar(currentNode!.position!.value, Colors.grey, true);
+        break;
       case "redButton":
         changeColor(Colors.red);
         break;
@@ -136,14 +151,6 @@ class _ARCorePageState extends State<ARCorePage> {
         break;
     }
   }
-
-
-  // void _addSphere(ArCoreController controller) {
-  //   final material = ArCoreMaterial(color: Colors.grey, metallic: 1.0);
-  //   final sphere = ArCoreCylinder(materials: [material], height: 0.05 , radius: 0.1 );
-  //   final node = ArCoreNode(shape: sphere, position: vector.Vector3(0, 0, -1));
-  //   controller.addArCoreNode(node);
-  // }
 
   @override
   void dispose() {
