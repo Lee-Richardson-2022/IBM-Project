@@ -1,7 +1,7 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin" // Ensure this plugin is applied for Flutter integration.
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
 def localProperties = new Properties()
@@ -12,17 +12,19 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode', '1')
-def flutterVersionName = localProperties.getProperty('flutter.versionName', '1.0')
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
 
 android {
-    namespace "com.example.ibm_test"
-
-    // It's best to explicitly set your compileSdkVersion to the latest stable version or at least ensure compatibility with ARCore.
-    compileSdkVersion flutter.compileSdkVersion // Assuming this is set to an appropriate value in your Flutter configuration.
-    compileSdkVersion 34
-
-    // If flutter.ndkVersion is not set or you want to specify it, do so here.
+    namespace "com.example.v2"
+    compileSdk 33
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -39,16 +41,20 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.ibm_test"
-        minSdkVersion 24 // Set your minimum SDK version to 24 for ARCore compatibility.
-        targetSdkVersion flutter.targetSdkVersion // Ensure this targets a version compatible with your app's requirements.
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.example.v2"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdkVersion 24
+        targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
     buildTypes {
         release {
-            // Consider configuring your own signing configuration for release builds.
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
         }
     }
@@ -59,10 +65,7 @@ flutter {
 }
 
 dependencies {
-    implementation 'com.google.ar:core:1.33.0' // ARCore dependency, make sure to use the latest version or the one that suits your needs.
-
-    // As of my last update, Sceneform is not actively maintained by Google and might require using a community-maintained version for newer features or fixes.
-    // Ensure these versions are compatible with your project setup.
     implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.8.0'
     implementation 'com.google.ar.sceneform:core:1.8.0'
+    implementation 'com.google.ar:core:1.8.0'
 }
