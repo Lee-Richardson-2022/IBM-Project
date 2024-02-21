@@ -64,65 +64,79 @@ class _ARCorePageState extends State<ARCorePage> {
 
   void _onPlaneTapHandler(List<ArCoreHitTestResult> hits) {
     if (hits.isNotEmpty) {
-
-      final redMaterial = ArCoreMaterial(color: Colors.red, reflectance: 1.0);
-      final redCylinder = ArCoreCylinder(materials: [redMaterial], radius: 0.01, height: 0.05);
-
-      final blueMaterial = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
-      final blueCylinder = ArCoreCylinder(materials: [blueMaterial], radius: 0.01, height: 0.05);
-
-      final greenMaterial = ArCoreMaterial(color: Colors.green, reflectance: 1.0);
-      final greenCylinder = ArCoreCylinder(materials: [greenMaterial], radius: 0.01, height: 0.05);
-
-      final redButton = ArCoreNode (
-          shape: redCylinder,
-          position: vector.Vector3(-0.1, 0, 0),
-          rotation: vector.Vector4(1, 0, 0, 1),
-      );
-
-      final blueButton = ArCoreNode (
-          shape: blueCylinder,
-          position: vector.Vector3(0.1, 0, 0),
-          rotation: vector.Vector4(1, 0, 0, 1),
-      );
-
-      final greenButton = ArCoreNode (
-          shape: greenCylinder,
-          position: vector.Vector3(0, 0.1, 0),
-          rotation: vector.Vector4(1, 0, 0, 1),
-      );
-
-
-      final material = ArCoreMaterial(color: Colors.grey, reflectance: 1.0);
-      final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
-      final newNode = ArCoreNode(
-          children: [redButton, blueButton, greenButton],
-          shape: cylinder,
-          position: hits.first.pose.translation
-      );
-
-      if (currentNode != null) {
-        arCoreController.removeNode(nodeName: currentNode!.name);
-      }
-
-      arCoreController.addArCoreNode(newNode);
-      currentNode = newNode;
+      createAvatar(hits.first.pose.translation, Colors.grey);
     }
   }
 
-  // final material = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
-  // final sphere = ArCoreSphere(materials: [material], radius: 0.1);
-  // final node = ArCoreNode(
-  //     shape: sphere,
-  //     position: hits.first.pose.translation,
+  void createAvatar(vector.Vector3 position, Color color) {
+    final redMaterial = ArCoreMaterial(color: Colors.red, reflectance: 1.0);
+    final redCylinder = ArCoreCylinder(materials: [redMaterial], radius: 0.01, height: 0.05);
+
+    final blueMaterial = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
+    final blueCylinder = ArCoreCylinder(materials: [blueMaterial], radius: 0.01, height: 0.05);
+
+    final greenMaterial = ArCoreMaterial(color: Colors.green, reflectance: 1.0);
+    final greenCylinder = ArCoreCylinder(materials: [greenMaterial], radius: 0.01, height: 0.05);
+
+    final redButton = ArCoreNode (
+      name: 'redButton',
+      shape: redCylinder,
+      position: vector.Vector3(-0.1, 0, 0),
+      rotation: vector.Vector4(1, 0, 0, 1),
+    );
+
+    final blueButton = ArCoreNode (
+      name: 'blueButton',
+      shape: blueCylinder,
+      position: vector.Vector3(0.1, 0, 0),
+      rotation: vector.Vector4(1, 0, 0, 1),
+    );
+
+    final greenButton = ArCoreNode (
+      name: 'greenButton',
+      shape: greenCylinder,
+      position: vector.Vector3(0, 0.1, 0),
+      rotation: vector.Vector4(1, 0, 0, 1),
+    );
+
+    final material = ArCoreMaterial(color: color, reflectance: 1.0);
+    final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
+    final newNode = ArCoreNode(
+        name: 'avatar',
+        children: [redButton, blueButton, greenButton],
+        shape: cylinder,
+        position: position
+    );
+
+    if (currentNode != null) {
+      arCoreController.removeNode(nodeName: currentNode!.name);
+    }
+
+    arCoreController.addArCoreNode(newNode);
+    currentNode = newNode;
+  }
+
+  void changeColor(Color color) {
+    arCoreController.removeNode(nodeName: currentNode!.name);
+
+    createAvatar(currentNode!.position!.value, color);
+  }
 
   void onTapHandler(String name) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) =>
-          AlertDialog(content: Text('Node Tapped ' + name.toString()),
-    ));
+    // Determine which cylinder was tapped
+    switch (name) {
+      case "redButton":
+        changeColor(Colors.red);
+        break;
+      case "blueButton":
+        changeColor(Colors.blue);
+        break;
+      case "greenButton":
+        changeColor(Colors.green);
+        break;
+    }
   }
+
 
   // void _addSphere(ArCoreController controller) {
   //   final material = ArCoreMaterial(color: Colors.grey, metallic: 1.0);
