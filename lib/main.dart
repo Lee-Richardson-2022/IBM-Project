@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'AR Core Example',
       home: ARCorePage(),
     );
@@ -15,6 +17,8 @@ class MyApp extends StatelessWidget {
 }
 
 class ARCorePage extends StatefulWidget {
+  const ARCorePage({super.key});
+
   @override
   _ARCorePageState createState() => _ARCorePageState();
 }
@@ -104,9 +108,9 @@ class _ARCorePageState extends State<ARCorePage> {
 
     final material = ArCoreMaterial(color: color, reflectance: 1.0);
     final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
-    final newNode;
+    final ArCoreNode newNode;
     if (withButtons){
-       newNode = ArCoreNode(
+      newNode = ArCoreNode(
           name: 'avatar',
           children: createButtons(),
           shape: cylinder,
