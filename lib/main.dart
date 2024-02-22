@@ -26,7 +26,7 @@ class ARCorePage extends StatefulWidget {
 class _ARCorePageState extends State<ARCorePage> {
   late ArCoreController arCoreController;
   ArCoreNode? currentNode;
-  double avatarScale = 1.0; // Initial scale factor for the avatar
+  double avatarScale = 1.0;
 
   void _onBottonNavTap(int index) {
     if (index == 2) {
@@ -46,17 +46,6 @@ class _ARCorePageState extends State<ARCorePage> {
               enableUpdateListener: true,
             ),
           ),
-          // Slider(
-          //   value: avatarScale,
-          //   min: 0.1,
-          //   max: 2.0,
-          //   onChanged: (value) {
-          //     setState(() {
-          //       avatarScale = value;
-          //       _updateAvatarScale();
-          //     });
-          //   },
-          // ),
           BottomNavigationBar(
             items: const [
               BottomNavigationBarItem(
@@ -159,7 +148,6 @@ class _ARCorePageState extends State<ARCorePage> {
   }
 
   void onTapHandler(String name) {
-    // Determine which cylinder was tapped
     switch (name) {
       case "avatar":
         createAvatar(currentNode!.position!.value, Colors.grey, true);
@@ -173,13 +161,6 @@ class _ARCorePageState extends State<ARCorePage> {
       case "greenButton":
         changeColor(Colors.green);
         break;
-    }
-  }
-
-  void _resetScene() {
-    if (currentNode != null) {
-      arCoreController.removeNode(nodeName: currentNode!.name);
-      currentNode = null;
     }
   }
 
