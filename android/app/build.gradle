@@ -17,12 +17,8 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName', '1.0
 
 android {
     namespace "com.example.ibm_test"
-
-    // It's best to explicitly set your compileSdkVersion to the latest stable version or at least ensure compatibility with ARCore.
     compileSdkVersion flutter.compileSdkVersion // Assuming this is set to an appropriate value in your Flutter configuration.
     compileSdkVersion 34
-
-    // If flutter.ndkVersion is not set or you want to specify it, do so here.
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -46,6 +42,9 @@ android {
         versionName flutterVersionName
     }
 
+
+
+
     buildTypes {
         release {
             // Consider configuring your own signing configuration for release builds.
@@ -59,10 +58,14 @@ flutter {
 }
 
 dependencies {
-    implementation 'com.google.ar:core:1.33.0' // ARCore dependency, make sure to use the latest version or the one that suits your needs.
+    // Provides ARCore Session and related resources.
+    implementation 'com.google.ar:core:1.41.0'
 
-    // As of my last update, Sceneform is not actively maintained by Google and might require using a community-maintained version for newer features or fixes.
-    // Ensure these versions are compatible with your project setup.
-    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.8.0'
-    implementation 'com.google.ar.sceneform:core:1.8.0'
+    // Provides ArFragment, and other UX resources.
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.15.0'
+
+    // Alternatively, use ArSceneView without the UX dependency.
+    implementation 'com.google.ar.sceneform:core:1.15.0'
 }
+
+

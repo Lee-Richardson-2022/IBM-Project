@@ -1,65 +1,84 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-// Import the ARViewPage from ar_view.dart
-import 'ar_view.dart'; // Make sure this path matches the location of your ar_view.dart file
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'ar_view.dart'; // Ensure this file exists and has a proper ARViewPage widget.
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: HomeScreen(),
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  MobileScannerController cameraController = MobileScannerController();
-  bool hasNavigatedToARView = false; // Add this line
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        scanQR();
+      }
+    });
+  }
 
+  Future<void> scanQR() async {
+    try {
+      final String scanResult = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666',
+        'Cancel',
+        true,
+        ScanMode.QR,
+      );
+
+      if (!mounted) return;
+
+      if (scanResult != '-1' && scanResult == "https://youtu.be/dQw4w9WgXcQ") {
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const ARViewPage()),
+        );
+      }
+    } catch (e) {
+      // Handle any errors here
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MobileScanner(
-        controller: cameraController,
-        onDetect: (barcodeCapture) {
-          final List<Barcode> barcodes = barcodeCapture.barcodes;
-          for (final barcode in barcodes) {
-            final String? code = barcode.rawValue;
-            debugPrint('Barcode found! $code');
-            if (!hasNavigatedToARView && code != null && code == "https://youtu.be/dQw4w9WgXcQ") {
-              setState(() {
-                hasNavigatedToARView = true; // Set to true to prevent multiple navigations
-                cameraController.stop();
-              });
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => ARViewPage()),
-              ).then((_) => setState(() { hasNavigatedToARView = false; })); // Reset on return
-            }
-          }
-        },
+      appBar: AppBar(title: const Text('QR Scan to AR')),
+      body: const Center(
+        child: Text('Scanning...'),
       ),
+      // Updated BottomAppBar with icons
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        notchMargin: 6.0,
+        color: Colors.white, // White background
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.flash_on),
-              onPressed: () => cameraController.toggleTorch(),
+              icon: const Icon(Icons.flash_on, color: Colors.black), // Black icon for contrast
+              onPressed: () {
+                // Implement flashlight toggle functionality
+              },
             ),
             IconButton(
-              icon: Icon(Icons.camera_alt),
-              onPressed: () => cameraController.switchCamera(),
+              icon: const Icon(Icons.camera_alt, color: Colors.black), // Black icon for contrast
+              onPressed: () {
+                // You might want to implement camera switch functionality or another action
+              },
             ),
           ],
         ),
