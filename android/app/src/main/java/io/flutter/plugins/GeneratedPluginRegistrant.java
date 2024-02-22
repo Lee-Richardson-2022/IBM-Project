@@ -20,5 +20,15 @@ public final class GeneratedPluginRegistrant {
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin arcore_flutter_plugin, com.difrancescogianmarco.arcore_flutter_plugin.ArcoreFlutterPlugin", e);
     }
+    try {
+      flutterEngine.getPlugins().add(new com.amolg.flutterbarcodescanner.FlutterBarcodeScannerPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin flutter_barcode_scanner, com.amolg.flutterbarcodescanner.FlutterBarcodeScannerPlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new io.flutter.plugins.flutter_plugin_android_lifecycle.FlutterAndroidLifecyclePlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin flutter_plugin_android_lifecycle, io.flutter.plugins.flutter_plugin_android_lifecycle.FlutterAndroidLifecyclePlugin", e);
+    }
   }
 }
