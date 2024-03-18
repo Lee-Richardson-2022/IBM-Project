@@ -1,134 +1,169 @@
-import 'dart:io';
-import 'package:ar_flutter_plugin/datatypes/config_planedetection.dart';
-import 'package:ar_flutter_plugin/datatypes/hittest_result_types.dart';
-import 'package:ar_flutter_plugin/datatypes/node_types.dart';
-import 'package:ar_flutter_plugin/managers/ar_anchor_manager.dart';
-import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
-import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
-import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
-import 'package:ar_flutter_plugin/models/ar_hittest_result.dart';
-import 'package:ar_flutter_plugin/models/ar_node.dart';
-import 'package:ar_flutter_plugin/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_anchor_manager.dart';
+import 'package:ar_flutter_plugin/models/ar_anchor.dart';
+import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
+import 'package:ar_flutter_plugin/datatypes/config_planedetection.dart';
+import 'package:ar_flutter_plugin/datatypes/node_types.dart';
+import 'package:ar_flutter_plugin/datatypes/hittest_result_types.dart';
+import 'package:ar_flutter_plugin/models/ar_node.dart';
+import 'package:ar_flutter_plugin/models/ar_hittest_result.dart';
 import 'package:path_provider/path_provider.dart';
-// import 'package:vector_math/vector_math_64.dart' as vector;
 import 'package:vector_math/vector_math_64.dart';
 
-
-class ARViewPage extends StatefulWidget {
-  const ARViewPage({super.key});
-
+class ObjectGesturesWidget extends StatefulWidget {
+  ObjectGesturesWidget({Key? key}) : super(key: key);
   @override
-  _ARViewPageState createState() => _ARViewPageState();
+  _ObjectGesturesWidgetState createState() => _ObjectGesturesWidgetState();
 }
 
-class _ARViewPageState extends State<ARViewPage> {
+class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   ARSessionManager? arSessionManager;
   ARObjectManager? arObjectManager;
   ARAnchorManager? arAnchorManager;
-  ARLocationManager? arLocationManager;
+  NodeTapResultHandler? onNodeTap;
+
+
+  ARNode? node;
+  ARAnchor? anchor;
 
   @override
   void dispose() {
-    arSessionManager?.dispose();
     super.dispose();
+    arSessionManager!.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("AR View"),
-      ),
-      body: ARView(
-        onARViewCreated: _onARViewCreated,
-        planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addARObject,
-        tooltip: 'Add AR Object',
-        child: const Icon(Icons.add),
-      ),
-    );
+        appBar: AppBar(
+          title: const Text('Object Transformation Gestures'),
+        ),
+        body: Container(
+            child: Stack(children: [
+              ARView(
+                onARViewCreated: onARViewCreated,
+                planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
+              ),
+              Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                          onPressed: onRemoveEverything,
+                          child: Text("Remove Everything")),
+                    ]),
+              )
+            ])));
   }
 
-  void _onARViewCreated(ARSessionManager arSessionManager, ARObjectManager arObjectManager, ARAnchorManager arAnchorManager, ARLocationManager arLocationManager) {
+  void onARViewCreated(
+      ARSessionManager arSessionManager,
+      ARObjectManager arObjectManager,
+      ARAnchorManager arAnchorManager,
+      ARLocationManager arLocationManager) {
     this.arSessionManager = arSessionManager;
     this.arObjectManager = arObjectManager;
     this.arAnchorManager = arAnchorManager;
-    this.arLocationManager = arLocationManager;
 
-    arSessionManager.onPlaneOrPointTap = _onPlaneTapped;
+    this.arSessionManager!.onInitialize(
+      showFeaturePoints: false,
+      showPlanes: true,
+      showWorldOrigin: false,
+      handlePans: true,
+      handleRotation: true,
+    );
+    this.arObjectManager!.onInitialize();
 
-    // List<ARNode> nodes = [];
-    // List<ARAnchor> anchors = [];
+    this.arSessionManager!.onPlaneOrPointTap = onPlaneOrPointTapped;
+
+    this.arObjectManager!.onPanStart = onPanStarted;
+    this.arObjectManager!.onPanChange = onPanChanged;
+    this.arObjectManager!.onPanEnd = onPanEnded;
+    this.arObjectManager!.onRotationStart = onRotationStarted;
+    this.arObjectManager!.onRotationChange = onRotationChanged;
+    this.arObjectManager!.onRotationEnd = onRotationEnded;
   }
 
-  void _onPlaneTapped(List<ARHitTestResult> hitTestResults) {
+  Future<void> onRemoveEverything() async {
+    this.arAnchorManager!.removeAnchor(anchor!);
+  }
 
-    // var singleHitTestResult = hitTestResults.firstWhere((hitTestResult) => hitTestResult.type == ARHitTestResultType.plane);
-    //
-    // if (singleHitTestResult != null) {
-    //   var newAnchor = ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
-    //
-    //   bool? didAddAnchor = await this.arAnchorManager!.addAnchor(newAnchor);
-    //
-    //   if (didAddAnchor!) {
-    //     this.anchors.add(newAnchor);
-    //     // Add note to anchor
-    //     var newNode = ARNode(
-    //         type: NodeType.webGLB,
-    //         uri:
-    //         "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF-Binary/Duck.glb",
-    //         scale: Vector3(0.2, 0.2, 0.2),
-    //         position: Vector3(0.0, 0.0, 0.0),
-    //         rotation: Vector4(1.0, 0.0, 0.0, 0.0));
-    //     bool? didAddNodeToAnchor =
-    //         await this.arObjectManager!.addNode(newNode, planeAnchor: newAnchor);
-    //     if (didAddNodeToAnchor!) {
-    //       this.nodes.add(newNode);
-    //     } else {
-    //       this.arSessionManager!.onError("Adding Node to Anchor failed");
-    //     }
-    //   } else {
-    //     this.arSessionManager!.onError("Adding Anchor failed");
-    //   }
+  Future<void> onPlaneOrPointTapped(List<ARHitTestResult> hitTestResults) async {
+    // Remove the old node if it exists
+    onRemoveEverything();
+
+    var singleHitTestResult = hitTestResults.firstWhere(
+            (hitTestResult) => hitTestResult.type == ARHitTestResultType.plane);
+    if (singleHitTestResult != null) {
+      var newAnchor = ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
+      bool? didAddAnchor = await arAnchorManager!.addAnchor(newAnchor);
+      if (didAddAnchor!) {
+        this.anchor = (newAnchor);
+
+        final modelFilePath = '${(await getTemporaryDirectory()).path}/rigged.glb';
+
+        // Add node to the anchor
+        var newNode = ARNode(
+          type: NodeType.webGLB,
+          uri: modelFilePath,
+          scale: Vector3(0.2, 0.2, 0.2),
+          position: Vector3(0.0, 0.0, 0.0),
+          rotation: Vector4(1.0, 0.0, 0.0, 0.0),
+        );
+        bool? didAddNodeToAnchor = await this.arObjectManager!.addNode(newNode, planeAnchor: newAnchor);
+        if (didAddNodeToAnchor!) {
+          this.node = (newNode);
+        } else {
+          this.arSessionManager!.onError("Adding Node to Anchor failed");
+        }
+      } else {
+        this.arSessionManager!.onError("Adding Anchor failed");
+      }
     }
-
-
-
-
-    // for (var hitTestResult in hitTestResults) {
-    //   if (hitTestResult.type == ARHitTestResultType.plane) {
-    //     final position = hitTestResult.worldTransform.getColumn(3);
-    //     _addARObjectAtHit(hitTestResult, position);
-    //     return;
-    //   }
-    // }
   }
 
-  void _addARObjectAtHit(ARHitTestResult hitTestResult, Vector4 position) {
-    final vector3Position = Vector3(position.x, position.y, position.z);
-    final node = ARNode(
-      type: NodeType.fileSystemAppFolderGLB,
-      uri: "assets/models/rigged.glb",
-      position: vector3Position,
-      scale: Vector3.all(0.5),
-    );
-    // arObjectManager?.addNode(node);
+
+  onPanStarted(String nodeName) {
+    print("Started panning node " + nodeName);
   }
 
-  void _addARObject() async {
-    final modelFilePath = '${(await getTemporaryDirectory()).path}/rigged.glb';
-    final modelBytes = await rootBundle.load('assets/models/rigged.glb');
-    await File(modelFilePath).writeAsBytes(modelBytes.buffer.asUint8List(modelBytes.offsetInBytes, modelBytes.lengthInBytes));
-
-    final node = ARNode(
-      type: NodeType.webGLB,
-      uri: modelFilePath,
-      position: Vector3(0, 0, -1),
-      scale: Vector3.all(0.5),
-    );
-    // arObjectManager?.addNode(node);
+  onPanChanged(String nodeName) {
+    print("Continued panning node " + nodeName);
   }
+
+  onPanEnded(String nodeName, Matrix4 newTransform) {
+    print("Ended panning node " + nodeName);
+    final pannedNode = this.node;
+
+    /*
+    * Uncomment the following command if you want to keep the transformations of the Flutter representations of the nodes up to date
+    * (e.g. if you intend to share the nodes through the cloud)
+    */
+    //pannedNode.transform = newTransform;
+  }
+
+  onRotationStarted(String nodeName) {
+    print("Started rotating node " + nodeName);
+  }
+
+  onRotationChanged(String nodeName) {
+    print("Continued rotating node " + nodeName);
+  }
+
+  onRotationEnded(String nodeName, Matrix4 newTransform) {
+    print("Ended rotating node " + nodeName);
+    final rotatedNode = this.node;
+
+    /*
+    * Uncomment the following command if you want to keep the transformations of the Flutter representations of the nodes up to date
+    * (e.g. if you intend to share the nodes through the cloud)
+    */
+    //rotatedNode.transform = newTransform;
+  }
+}
+

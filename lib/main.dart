@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'ar_view.dart'; // Ensure this file exists and contains a properly implemented ARViewPage widget.
-import 'ar_testing.dart';
+import 'ar_view.dart';
 
 void main() => runApp(const MyApp());
 
