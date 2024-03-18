@@ -36,6 +36,8 @@ dependencies:
   vector_math: ^2.1.0 # Check for the latest version
   flutter_barcode_scanner: ^2.0.0
   model_viewer_plus: ^1.6.0
+  ar_flutter_plugin: ^0.7.3
+  path_provider: ^2.1.2
 
 
 
@@ -95,3 +97,4 @@ flutter:
 
   assets:
     - assets/models/
+    - assets/models/Monkey.glb

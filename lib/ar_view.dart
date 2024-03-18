@@ -1,231 +1,97 @@
+import 'dart:io';
+import 'package:ar_flutter_plugin/datatypes/config_planedetection.dart';
+import 'package:ar_flutter_plugin/datatypes/hittest_result_types.dart';
+import 'package:ar_flutter_plugin/datatypes/node_types.dart';
+import 'package:ar_flutter_plugin/managers/ar_anchor_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
+import 'package:ar_flutter_plugin/models/ar_hittest_result.dart';
+import 'package:ar_flutter_plugin/models/ar_node.dart';
+import 'package:ar_flutter_plugin/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
-import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
 class ARViewPage extends StatefulWidget {
-  const ARViewPage({Key? key}) : super(key: key);
+  const ARViewPage({super.key});
 
   @override
   _ARViewPageState createState() => _ARViewPageState();
 }
 
 class _ARViewPageState extends State<ARViewPage> {
-  late ArCoreController arCoreController;
-  ArCoreNode? currentNode;
-  double avatarScale = 1.0;
+  ARSessionManager? arSessionManager;
+  ARObjectManager? arObjectManager;
+  ARAnchorManager? arAnchorManager;
+  ARLocationManager? arLocationManager;
 
-
-void _onBottonNavTap(int index) {
-  if (index == 2) {
-    _showSettingsDialog();
+  @override
+  void dispose() {
+    arSessionManager?.dispose();
+    super.dispose();
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: ArCoreView(
-              onArCoreViewCreated: _onArCoreViewCreated,
-              enableTapRecognizer: true,
-              enableUpdateListener: true,
-            ),
-          ),
-          BottomNavigationBar(
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.credit_card),
-                label: 'History',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.camera_alt),
-                label: 'Camera',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
-              ),
-            ],
-            onTap: _onBottonNavTap,
-          ),
-        ],
+      appBar: AppBar(
+        title: const Text("AR View"),
+      ),
+      body: ARView(
+        onARViewCreated: _onARViewCreated,
+        planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addARObject,
+        tooltip: 'Add AR Object',
+        child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _onArCoreViewCreated(ArCoreController controller) {
-    arCoreController = controller;
-    arCoreController.onNodeTap = (name) => onTapHandler(name);
-    arCoreController.onPlaneTap = _onPlaneTapHandler;
+  void _onARViewCreated(ARSessionManager arSessionManager, ARObjectManager arObjectManager, ARAnchorManager arAnchorManager, ARLocationManager arLocationManager) {
+    this.arSessionManager = arSessionManager;
+    this.arObjectManager = arObjectManager;
+    this.arAnchorManager = arAnchorManager;
+    this.arLocationManager = arLocationManager;
+
+    arSessionManager.onPlaneOrPointTap = _onPlaneTapped;
   }
 
-  void _onPlaneTapHandler(List<ArCoreHitTestResult> hits) {
-    if (hits.isNotEmpty) {
-      createAvatar(hits.first.pose.translation, Colors.grey, false);
+  void _onPlaneTapped(List<ARHitTestResult> hitTestResults) {
+    for (var hitTestResult in hitTestResults) {
+      if (hitTestResult.type == ARHitTestResultType.plane) {
+        final position = hitTestResult.worldTransform.getColumn(3);
+        _addARObjectAtHit(hitTestResult, position);
+        return;
+      }
     }
   }
 
-  List<ArCoreNode> createButtons() {
-    final redMaterial = ArCoreMaterial(color: Colors.red, reflectance: 1.0);
-    final redCylinder = ArCoreCylinder(materials: [redMaterial], radius: 0.01, height: 0.05);
-
-    final blueMaterial = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
-    final blueCylinder = ArCoreCylinder(materials: [blueMaterial], radius: 0.01, height: 0.05);
-
-    final greenMaterial = ArCoreMaterial(color: Colors.green, reflectance: 1.0);
-    final greenCylinder = ArCoreCylinder(materials: [greenMaterial], radius: 0.01, height: 0.05);
-
-    final redButton = ArCoreNode(
-      name: 'redButton',
-      shape: redCylinder,
-      position: vector.Vector3(-0.1, 0, 0),
-      rotation: vector.Vector4(1, 0, 0, 1),
+  void _addARObjectAtHit(ARHitTestResult hitTestResult, vector.Vector4 position) {
+    final vector3Position = vector.Vector3(position.x, position.y, position.z);
+    final node = ARNode(
+      type: NodeType.fileSystemAppFolderGLB,
+      uri: "assets/models/rigged.glb",
+      position: vector3Position,
+      scale: vector.Vector3.all(0.5),
     );
+    arObjectManager?.addNode(node);
+  }
 
-    final blueButton = ArCoreNode(
-      name: 'blueButton',
-      shape: blueCylinder,
-      position: vector.Vector3(0.1, 0, 0),
-      rotation: vector.Vector4(1, 0, 0, 1),
+  void _addARObject() async {
+    final modelFilePath = '${(await getTemporaryDirectory()).path}/rigged.glb';
+    final modelBytes = await rootBundle.load('assets/models/rigged.glb');
+    await File(modelFilePath).writeAsBytes(modelBytes.buffer.asUint8List(modelBytes.offsetInBytes, modelBytes.lengthInBytes));
+
+    final node = ARNode(
+      type: NodeType.webGLB,
+      uri: modelFilePath,
+      position: vector.Vector3(0, 0, -1),
+      scale: vector.Vector3.all(0.5),
     );
-
-    final greenButton = ArCoreNode(
-      name: 'greenButton',
-      shape: greenCylinder,
-      position: vector.Vector3(0, 0.1, 0),
-      rotation: vector.Vector4(1, 0, 0, 1),
-    );
-    return [redButton, blueButton, greenButton];
-  }
-
-  void createAvatar(vector.Vector3 position, Color color, bool withButtons) {
-    final material = ArCoreMaterial(color: color, reflectance: 1.0);
-    final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
-    final ArCoreNode newNode;
-    if (withButtons) {
-      newNode = ArCoreNode(
-        name: 'avatar',
-        children: createButtons(),
-        shape: cylinder,
-        position: position,
-        scale: vector.Vector3(avatarScale, avatarScale, avatarScale),
-      );
-    } else {
-      newNode = ArCoreNode(
-        name: 'avatar',
-        shape: cylinder,
-        position: position,
-        scale: vector.Vector3(avatarScale, avatarScale, avatarScale),
-      );
-    }
-
-    if (currentNode != null) {
-      arCoreController.removeNode(nodeName: currentNode!.name);
-    }
-
-    arCoreController.addArCoreNode(newNode);
-    currentNode = newNode;
-  }
-
-  void changeColor(Color color) {
-    arCoreController.removeNode(nodeName: currentNode!.name);
-    createAvatar(currentNode!.position!.value, color, true);
-  }
-
-  void onTapHandler(String name) {
-    switch (name) {
-      case "avatar":
-        createAvatar(currentNode!.position!.value, Colors.grey, true);
-        break;
-      case "redButton":
-        changeColor(Colors.red);
-        break;
-      case "blueButton":
-        changeColor(Colors.blue);
-        break;
-      case "greenButton":
-        changeColor(Colors.green);
-        break;
-    }
-  }
-
-  void _updateAvatarScale() {
-    if (currentNode != null) {
-      arCoreController.removeNode(nodeName: currentNode!.name);
-      createAvatar(currentNode!.position!.value, Colors.grey, true);
-    }
-  }
-
-  void _showSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        bool subtitlesEnabled = false; // Variable to track subtitles option
-        double avatarSize = avatarScale; // Variable to track avatar size
-
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white60, // Set background color to transparent
-              elevation: 0, // Set elevation to 0 to remove shadow
-              title: const Text("Settings"),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: <Widget>[
-                    // Subtitles option
-                    CheckboxListTile(
-                      title: const Text('Subtitles'),
-                      value: subtitlesEnabled,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          subtitlesEnabled = value ?? true;
-                          // Implement subtitle display logic based on the value
-                          // For example: if (subtitlesEnabled) { /* Show subtitles */ }
-                        });
-                      },
-                    ),
-                    // Avatar size label and slider
-
-                    Text(
-                      'Avatar Size: ${avatarSize.toStringAsFixed(2)}', // Display current avatar size
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    Slider(
-                      value: avatarSize,
-                      min: 0.5,
-                      max: 2.0,
-                      onChanged: (value) {
-                        setState(() {
-                          avatarSize = value;
-                          avatarScale = value; // Update the global avatarScale variable
-                          _updateAvatarScale(); // Update avatar scale in AR view
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Close'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    arCoreController.dispose();
-    super.dispose();
+    arObjectManager?.addNode(node);
   }
 }
