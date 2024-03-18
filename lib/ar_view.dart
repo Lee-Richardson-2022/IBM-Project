@@ -14,6 +14,14 @@ import 'package:ar_flutter_plugin/models/ar_hittest_result.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
+import 'api_functions.dart';
+import 'package:flutter/material.dart'; // Core Flutter framework
+import 'package:http/http.dart' as http; // For making HTTP requests
+import 'dart:convert'; // For JSON encoding/decoding
+import 'package:audioplayers/audioplayers.dart'; // For playing audio
+import 'package:path_provider/path_provider.dart'; // For accessing device file storage
+import 'dart:io'; // For file operations
+
 
 class ObjectGesturesWidget extends StatefulWidget {
   ObjectGesturesWidget({Key? key}) : super(key: key);
@@ -33,6 +41,12 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   NodeRotationStartHandler? onRotationStart;
   NodeRotationChangeHandler? onRotationChange;
   NodeRotationEndHandler? onRotationEnd;
+
+  final String apiKey = 'YMVJWGmKng-VU9EmjKMw0aEncMrZdc-CHZyCaHmR04qP';
+  final String ibmURL =
+      'https://api.au-syd.text-to-speech.watson.cloud.ibm.com/instances/94dbd1e6-3df9-4900-b1ce-c88e76596c4c/v1/synthesize';
+  bool _isProcessing = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   ARNode? node;
   ARAnchor? anchor;
@@ -138,9 +152,8 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
 
   Future<void> onNodeTapped(List<String> nodeNames) async {
     print("Node has been tapped" + nodeNames[0]);
-
+    convertTextToSpeech("Hello this is john's business card");
   }
-
 
   onPanStarted(String nodeName) {
     print("Started panning node " + nodeName);
@@ -153,12 +166,6 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   onPanEnded(String nodeName, Matrix4 newTransform) {
     print("Ended panning node " + nodeName);
     final pannedNode = this.node;
-
-    /*
-    * Uncomment the following command if you want to keep the transformations of the Flutter representations of the nodes up to date
-    * (e.g. if you intend to share the nodes through the cloud)
-    */
-    //pannedNode.transform = newTransform;
   }
 
   onRotationStarted(String nodeName) {
@@ -172,11 +179,48 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   onRotationEnded(String nodeName, Matrix4 newTransform) {
     print("Ended rotating node " + nodeName);
     final rotatedNode = this.node;
-
-    /*
-    * Uncomment the following command if you want to keep the transformations of the Flutter representations of the nodes up to date
-    * (e.g. if you intend to share the nodes through the cloud)
-    */
-    //rotatedNode.transform = newTransform;
   }
-}
+
+    Future<void> convertTextToSpeech(String message) async {
+      setState(() {
+        _isProcessing = true; // Indicate processing has begun
+      });
+
+      // Prepare HTTP request headers for IBM API authentication
+      var headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + base64Encode(utf8.encode('apikey:$apiKey')),
+      };
+
+      // Create HTTP request object
+      var request = http.Request('POST', Uri.parse(ibmURL));
+      request.body = json.encode({"text": message, "accept": "audio/wav"});
+      request.headers.addAll(headers);
+
+      try {
+        http.StreamedResponse response = await request.send();
+
+        if (response.statusCode == 200) {
+          // Process successful response
+          var bytes = await response.stream.toBytes();
+          var dir = await getTemporaryDirectory();
+          var file = File("${dir.path}/speech.wav");
+
+          await file.writeAsBytes(bytes); // Store the audio file
+          await _audioPlayer.play(DeviceFileSource(file.path)); // Play audio
+        } else {
+          // Handle failed request
+          print('Request failed with status code: ${response.statusCode}');
+          print(response.reasonPhrase);
+        }
+      } catch (e) {
+        // Handle errors
+        print('Error occurred: $e');
+        print('Request details: $request');
+      }
+
+      setState(() {
+        _isProcessing = false; // Processing completed
+      });
+    }
+  }

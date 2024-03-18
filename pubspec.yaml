@@ -30,13 +30,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   cupertino_icons: ^1.0.2
-  arcore_flutter_plugin: ^0.1.0
-  mobile_scanner: ^4.0.0
   vector_math: ^2.1.0 # Check for the latest version
   flutter_barcode_scanner: ^2.0.0
   model_viewer_plus: ^1.6.0
   ar_flutter_plugin: ^0.7.3
+  http: ^1.2.0
+  audioplayers: ^5.2.1
   path_provider: ^2.1.2
 
 
