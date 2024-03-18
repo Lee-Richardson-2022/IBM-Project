@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'ar_view.dart'; // Ensure this file exists and contains a properly implemented ARViewPage widget.
+import 'ar_testing.dart';
 
 void main() => runApp(const MyApp());
 
@@ -47,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (scanResult != '-1' && scanResult == "https://youtu.be/dQw4w9WgXcQ") {
         await Future.delayed(const Duration(milliseconds: 500)); // Allow time for the camera to be released.
         await Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const ARViewPage()),
+          MaterialPageRoute(builder: (context) => ObjectGesturesWidget()),
         );
       }
     } catch (e) {

@@ -12,7 +12,9 @@ import 'package:ar_flutter_plugin/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:vector_math/vector_math_64.dart' as vector;
+// import 'package:vector_math/vector_math_64.dart' as vector;
+import 'package:vector_math/vector_math_64.dart';
+
 
 class ARViewPage extends StatefulWidget {
   const ARViewPage({super.key});
@@ -58,27 +60,63 @@ class _ARViewPageState extends State<ARViewPage> {
     this.arLocationManager = arLocationManager;
 
     arSessionManager.onPlaneOrPointTap = _onPlaneTapped;
+
+    // List<ARNode> nodes = [];
+    // List<ARAnchor> anchors = [];
   }
 
   void _onPlaneTapped(List<ARHitTestResult> hitTestResults) {
-    for (var hitTestResult in hitTestResults) {
-      if (hitTestResult.type == ARHitTestResultType.plane) {
-        final position = hitTestResult.worldTransform.getColumn(3);
-        _addARObjectAtHit(hitTestResult, position);
-        return;
-      }
+
+    // var singleHitTestResult = hitTestResults.firstWhere((hitTestResult) => hitTestResult.type == ARHitTestResultType.plane);
+    //
+    // if (singleHitTestResult != null) {
+    //   var newAnchor = ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
+    //
+    //   bool? didAddAnchor = await this.arAnchorManager!.addAnchor(newAnchor);
+    //
+    //   if (didAddAnchor!) {
+    //     this.anchors.add(newAnchor);
+    //     // Add note to anchor
+    //     var newNode = ARNode(
+    //         type: NodeType.webGLB,
+    //         uri:
+    //         "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF-Binary/Duck.glb",
+    //         scale: Vector3(0.2, 0.2, 0.2),
+    //         position: Vector3(0.0, 0.0, 0.0),
+    //         rotation: Vector4(1.0, 0.0, 0.0, 0.0));
+    //     bool? didAddNodeToAnchor =
+    //         await this.arObjectManager!.addNode(newNode, planeAnchor: newAnchor);
+    //     if (didAddNodeToAnchor!) {
+    //       this.nodes.add(newNode);
+    //     } else {
+    //       this.arSessionManager!.onError("Adding Node to Anchor failed");
+    //     }
+    //   } else {
+    //     this.arSessionManager!.onError("Adding Anchor failed");
+    //   }
     }
+
+
+
+
+    // for (var hitTestResult in hitTestResults) {
+    //   if (hitTestResult.type == ARHitTestResultType.plane) {
+    //     final position = hitTestResult.worldTransform.getColumn(3);
+    //     _addARObjectAtHit(hitTestResult, position);
+    //     return;
+    //   }
+    // }
   }
 
-  void _addARObjectAtHit(ARHitTestResult hitTestResult, vector.Vector4 position) {
-    final vector3Position = vector.Vector3(position.x, position.y, position.z);
+  void _addARObjectAtHit(ARHitTestResult hitTestResult, Vector4 position) {
+    final vector3Position = Vector3(position.x, position.y, position.z);
     final node = ARNode(
       type: NodeType.fileSystemAppFolderGLB,
       uri: "assets/models/rigged.glb",
       position: vector3Position,
-      scale: vector.Vector3.all(0.5),
+      scale: Vector3.all(0.5),
     );
-    arObjectManager?.addNode(node);
+    // arObjectManager?.addNode(node);
   }
 
   void _addARObject() async {
@@ -89,9 +127,8 @@ class _ARViewPageState extends State<ARViewPage> {
     final node = ARNode(
       type: NodeType.webGLB,
       uri: modelFilePath,
-      position: vector.Vector3(0, 0, -1),
-      scale: vector.Vector3.all(0.5),
+      position: Vector3(0, 0, -1),
+      scale: Vector3.all(0.5),
     );
-    arObjectManager?.addNode(node);
+    // arObjectManager?.addNode(node);
   }
-}
