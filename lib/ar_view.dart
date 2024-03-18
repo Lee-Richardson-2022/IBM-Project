@@ -25,8 +25,6 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   ARObjectManager? arObjectManager;
   ARAnchorManager? arAnchorManager;
   NodeTapResultHandler? onNodeTap;
-
-
   ARNode? node;
   ARAnchor? anchor;
 
@@ -39,9 +37,6 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Object Transformation Gestures'),
-        ),
         body: Container(
             child: Stack(children: [
               ARView(
