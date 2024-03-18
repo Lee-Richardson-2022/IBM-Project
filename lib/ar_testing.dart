@@ -25,8 +25,8 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   ARObjectManager? arObjectManager;
   ARAnchorManager? arAnchorManager;
 
-  ARNode? node;
-  ARAnchor? anchor;
+  List<ARNode> nodes = [];
+  List<ARAnchor> anchors = [];
 
   @override
   void dispose() {
@@ -71,7 +71,6 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
     this.arSessionManager!.onInitialize(
       showFeaturePoints: false,
       showPlanes: true,
-      // customPlaneTexturePath: "Images/triangle.png",
       showWorldOrigin: false,
       handlePans: true,
       handleRotation: true,
@@ -88,41 +87,43 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   }
 
   Future<void> onRemoveEverything() async {
-    if (anchor != null) {
-      arAnchorManager!.removeAnchor(anchor!);
-      anchor = null;
-      node = null;
-    }
+    anchors.forEach((anchor) {
+      this.arAnchorManager!.removeAnchor(anchor);
+    });
+    anchors = [];
   }
 
   Future<void> onPlaneOrPointTapped(
       List<ARHitTestResult> hitTestResults) async {
-    if (node != null) {
-      arObjectManager!.removeNode(node!);
-    }
-
     var singleHitTestResult = hitTestResults.firstWhere(
             (hitTestResult) => hitTestResult.type == ARHitTestResultType.plane);
     if (singleHitTestResult != null) {
-      anchor = ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
-      bool? didAddAnchor = await arAnchorManager!.addAnchor(anchor!);
+      var newAnchor =
+      ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
+      bool? didAddAnchor = await this.arAnchorManager!.addAnchor(newAnchor);
       if (didAddAnchor!) {
-        final modelFilePath = '${(await getTemporaryDirectory()).path}/rigged.glb';
+        this.anchors.add(newAnchor);
 
-        node = ARNode(
+        final modelFilePath = '${(await getTemporaryDirectory()).path}/rigged.glb';
+        //final modelBytes = await rootBundle.load('assets/models/rigged.glb');
+        // await File(modelFilePath).writeAsBytes(modelBytes.buffer.asUint8List(modelBytes.offsetInBytes, modelBytes.lengthInBytes));
+
+        // Add note to anchor
+        var newNode = ARNode(
             type: NodeType.webGLB,
             uri: modelFilePath,
             scale: Vector3(0.2, 0.2, 0.2),
             position: Vector3(0.0, 0.0, 0.0),
             rotation: Vector4(1.0, 0.0, 0.0, 0.0));
-
-        bool? didAddNodeToAnchor = await arObjectManager!.addNode(node!, planeAnchor: anchor);
-
-        if (!didAddNodeToAnchor!) {
-          arSessionManager!.onError("Adding Node to Anchor failed");
+        bool? didAddNodeToAnchor =
+        await this.arObjectManager!.addNode(newNode, planeAnchor: newAnchor);
+        if (didAddNodeToAnchor!) {
+          this.nodes.add(newNode);
+        } else {
+          this.arSessionManager!.onError("Adding Node to Anchor failed");
         }
       } else {
-        arSessionManager!.onError("Adding Anchor failed");
+        this.arSessionManager!.onError("Adding Anchor failed");
       }
     }
   }
@@ -137,6 +138,14 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
 
   onPanEnded(String nodeName, Matrix4 newTransform) {
     print("Ended panning node " + nodeName);
+    final pannedNode =
+    this.nodes.firstWhere((element) => element.name == nodeName);
+
+    /*
+    * Uncomment the following command if you want to keep the transformations of the Flutter representations of the nodes up to date
+    * (e.g. if you intend to share the nodes through the cloud)
+    */
+    //pannedNode.transform = newTransform;
   }
 
   onRotationStarted(String nodeName) {
@@ -149,5 +158,14 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
 
   onRotationEnded(String nodeName, Matrix4 newTransform) {
     print("Ended rotating node " + nodeName);
+    final rotatedNode =
+    this.nodes.firstWhere((element) => element.name == nodeName);
+
+    /*
+    * Uncomment the following command if you want to keep the transformations of the Flutter representations of the nodes up to date
+    * (e.g. if you intend to share the nodes through the cloud)
+    */
+    //rotatedNode.transform = newTransform;
   }
 }
+
