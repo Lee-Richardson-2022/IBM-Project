@@ -12,7 +12,8 @@ import 'package:ar_flutter_plugin/datatypes/hittest_result_types.dart';
 import 'package:ar_flutter_plugin/models/ar_node.dart';
 import 'package:ar_flutter_plugin/models/ar_hittest_result.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' as vector;
+
 
 class ObjectGesturesWidget extends StatefulWidget {
   ObjectGesturesWidget({Key? key}) : super(key: key);
@@ -24,7 +25,15 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   ARSessionManager? arSessionManager;
   ARObjectManager? arObjectManager;
   ARAnchorManager? arAnchorManager;
+
   NodeTapResultHandler? onNodeTap;
+  NodePanStartHandler? onPanStart;
+  NodePanChangeHandler? onPanChange;
+  NodePanEndHandler? onPanEnd;
+  NodeRotationStartHandler? onRotationStart;
+  NodeRotationChangeHandler? onRotationChange;
+  NodeRotationEndHandler? onRotationEnd;
+
   ARNode? node;
   ARAnchor? anchor;
 
@@ -37,11 +46,15 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: const Text('Object Transformation Gestures'),
+        ),
         body: Container(
             child: Stack(children: [
               ARView(
                 onARViewCreated: onARViewCreated,
                 planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
+                // onTap: onARViewTapped,
               ),
               Align(
                 alignment: FractionalOffset.bottomCenter,
@@ -74,8 +87,8 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
     );
     this.arObjectManager!.onInitialize();
 
+    this.arObjectManager!.onNodeTap = onNodeTapped;
     this.arSessionManager!.onPlaneOrPointTap = onPlaneOrPointTapped;
-
     this.arObjectManager!.onPanStart = onPanStarted;
     this.arObjectManager!.onPanChange = onPanChanged;
     this.arObjectManager!.onPanEnd = onPanEnded;
@@ -85,32 +98,33 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   }
 
   Future<void> onRemoveEverything() async {
-    this.arAnchorManager!.removeAnchor(anchor!);
+    anchor = null;
   }
 
-  Future<void> onPlaneOrPointTapped(List<ARHitTestResult> hitTestResults) async {
-    // Remove the old node if it exists
-    onRemoveEverything();
-
+  Future<void> onPlaneOrPointTapped(
+      List<ARHitTestResult> hitTestResults) async {
     var singleHitTestResult = hitTestResults.firstWhere(
             (hitTestResult) => hitTestResult.type == ARHitTestResultType.plane);
     if (singleHitTestResult != null) {
-      var newAnchor = ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
-      bool? didAddAnchor = await arAnchorManager!.addAnchor(newAnchor);
+      var newAnchor =
+      ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
+      bool? didAddAnchor =
+      await this.arAnchorManager!.addAnchor(newAnchor);
       if (didAddAnchor!) {
         this.anchor = (newAnchor);
 
-        final modelFilePath = '${(await getTemporaryDirectory()).path}/rigged.glb';
+        final modelFilePath =
+            '${(await getTemporaryDirectory()).path}/rigged.glb';
 
         // Add node to the anchor
         var newNode = ARNode(
-          type: NodeType.webGLB,
-          uri: modelFilePath,
-          scale: Vector3(0.2, 0.2, 0.2),
-          position: Vector3(0.0, 0.0, 0.0),
-          rotation: Vector4(1.0, 0.0, 0.0, 0.0),
-        );
-        bool? didAddNodeToAnchor = await this.arObjectManager!.addNode(newNode, planeAnchor: newAnchor);
+            type: NodeType.webGLB,
+            uri: modelFilePath,
+            scale: vector.Vector3(0.2, 0.2, 0.2),
+            position: vector.Vector3(0.0, 0.0, 0.0),
+            rotation: vector.Vector4(1.0, 0.0, 0.0, 0.0));
+        bool? didAddNodeToAnchor = await this.arObjectManager!
+            .addNode(newNode, planeAnchor: newAnchor);
         if (didAddNodeToAnchor!) {
           this.node = (newNode);
         } else {
@@ -120,6 +134,11 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
         this.arSessionManager!.onError("Adding Anchor failed");
       }
     }
+  }
+
+  Future<void> onNodeTapped(List<String> nodeNames) async {
+    print("Node has been tapped" + nodeNames[0]);
+
   }
 
 
@@ -161,4 +180,3 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
     //rotatedNode.transform = newTransform;
   }
 }
-
