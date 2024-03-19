@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (scanResult != '-1' && scanResult == "https://youtu.be/dQw4w9WgXcQ") {
         await Future.delayed(const Duration(milliseconds: 500)); // Allow time for the camera to be released.
         await Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => ObjectGesturesWidget()),
+          MaterialPageRoute(builder: (context) => const ObjectGesturesWidget()),
         );
       }
     } catch (e) {

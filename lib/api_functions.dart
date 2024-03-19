@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:vector_math/vector_math_64.dart' as vector;
 
 class TextToSpeechWidget extends StatefulWidget {
   final String message;
@@ -24,12 +23,12 @@ class _TextToSpeechWidgetState extends State<TextToSpeechWidget> {
   final String apiKey = 'YMVJWGmKng-VU9EmjKMw0aEncMrZdc-CHZyCaHmR04qP';
   final String ibmURL =
       'https://api.au-syd.text-to-speech.watson.cloud.ibm.com/instances/94dbd1e6-3df9-4900-b1ce-c88e76596c4c/v1/synthesize';
-  bool _isProcessing = false;
+  final bool _isProcessing = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   Future<void> convertTextToSpeech(String message) async {
@@ -38,7 +37,7 @@ class _TextToSpeechWidgetState extends State<TextToSpeechWidget> {
     // Prepare HTTP request headers for IBM API authentication
     var headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Basic ' + base64Encode(utf8.encode('apikey:$apiKey')),
+      'Authorization': 'Basic ${base64Encode(utf8.encode('apikey:$apiKey'))}',
     };
 
     // Create HTTP request object

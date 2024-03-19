@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
 import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
@@ -14,17 +13,16 @@ import 'package:ar_flutter_plugin/models/ar_hittest_result.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
-import 'api_functions.dart';
-import 'package:flutter/material.dart'; // Core Flutter framework
+// Core Flutter framework
 import 'package:http/http.dart' as http; // For making HTTP requests
 import 'dart:convert'; // For JSON encoding/decoding
 import 'package:audioplayers/audioplayers.dart'; // For playing audio
-import 'package:path_provider/path_provider.dart'; // For accessing device file storage
+// For accessing device file storage
 import 'dart:io'; // For file operations
 
-
 class ObjectGesturesWidget extends StatefulWidget {
-  ObjectGesturesWidget({Key? key}) : super(key: key);
+  const ObjectGesturesWidget({Key? key}) : super(key: key);
+
   @override
   _ObjectGesturesWidgetState createState() => _ObjectGesturesWidgetState();
 }
@@ -42,11 +40,13 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   NodeRotationChangeHandler? onRotationChange;
   NodeRotationEndHandler? onRotationEnd;
 
-  final String apiKey = 'YMVJWGmKng-VU9EmjKMw0aEncMrZdc-CHZyCaHmR04qP';
+  final String apiKey =
+      'i6dMF2ABNtgoeKxJKW3F88a_DBwtxMf3rOwS7Bde_SI3';
   final String ibmURL =
-      'https://api.au-syd.text-to-speech.watson.cloud.ibm.com/instances/94dbd1e6-3df9-4900-b1ce-c88e76596c4c/v1/synthesize';
+      'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/c7604c72-6d16-4e92-87b0-1fa408703bdc/v1/synthesize';
   bool _isProcessing = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _showFloatingActionButton = false; // State variable for FAB visibility
 
   ARNode? node;
   ARAnchor? anchor;
@@ -60,27 +60,60 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Object Transformation Gestures'),
-        ),
-        body: Container(
-            child: Stack(children: [
-              ARView(
-                onARViewCreated: onARViewCreated,
-                planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
-                // onTap: onARViewTapped,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                child: ARView(
+                  onARViewCreated: onARViewCreated,
+                  planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
+                  // onTap: onARViewTapped,
+                ),
               ),
-              Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                          onPressed: onRemoveEverything,
-                          child: Text("Remove Everything")),
-                    ]),
-              )
-            ])));
+              // Add any other widgets below the AR view
+              BottomNavigationBar(
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.credit_card),
+                    label: 'History',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.camera_alt),
+                    label: 'Camera',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.settings),
+                    label: 'Settings',
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (_showFloatingActionButton) // Conditionally show FAB
+            Positioned(
+              bottom: 100.0,
+              right: 16.0,
+              child: FloatingActionButton(
+                onPressed: () {
+                  convertTextToSpeech("Hello this is john's business card");
+                },
+                child: Icon(Icons.play_arrow),
+              ),
+            ),
+          Positioned(
+            bottom: 100.0,
+            left: 16.0,
+            child: FloatingActionButton(
+              onPressed: () {
+                removeNode();
+              },
+              child: Icon(Icons.replay),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void onARViewCreated(
@@ -101,126 +134,136 @@ class _ObjectGesturesWidgetState extends State<ObjectGesturesWidget> {
     );
     this.arObjectManager!.onInitialize();
 
-    this.arObjectManager!.onNodeTap = onNodeTapped;
+    // this.arObjectManager!.onNodeTap = onNodeTapped;
     this.arSessionManager!.onPlaneOrPointTap = onPlaneOrPointTapped;
-    this.arObjectManager!.onPanStart = onPanStarted;
-    this.arObjectManager!.onPanChange = onPanChanged;
-    this.arObjectManager!.onPanEnd = onPanEnded;
-    this.arObjectManager!.onRotationStart = onRotationStarted;
-    this.arObjectManager!.onRotationChange = onRotationChanged;
-    this.arObjectManager!.onRotationEnd = onRotationEnded;
-  }
-
-  Future<void> onRemoveEverything() async {
-    anchor = null;
+    // this.arObjectManager!.onPanStart = onPanStarted;
+    // this.arObjectManager!.onPanChange = onPanChanged;
+    // this.arObjectManager!.onPanEnd = onPanEnded;
+    // this.arObjectManager!.onRotationStart = onRotationStarted;
+    // this.arObjectManager!.onRotationChange = onRotationChanged;
+    // this.arObjectManager!.onRotationEnd = onRotationEnded;
   }
 
   Future<void> onPlaneOrPointTapped(
       List<ARHitTestResult> hitTestResults) async {
-    var singleHitTestResult = hitTestResults.firstWhere(
-            (hitTestResult) => hitTestResult.type == ARHitTestResultType.plane);
-    if (singleHitTestResult != null) {
-      var newAnchor =
-      ARPlaneAnchor(transformation: singleHitTestResult.worldTransform);
-      bool? didAddAnchor =
-      await this.arAnchorManager!.addAnchor(newAnchor);
-      if (didAddAnchor!) {
-        this.anchor = (newAnchor);
+    // Remove existing node if any
+    if (this.node != null) {
+      this.arObjectManager!.removeNode(this.node!);
+      this.node = null;
+    }
+    // if (node == null) {
+      var singleHitTestResult = hitTestResults.firstWhere((hitTestResult) =>
+      hitTestResult.type == ARHitTestResultType.plane);
+      var newAnchor = ARPlaneAnchor(
+          transformation: singleHitTestResult.worldTransform);
+      bool? didAddAnchor = await arAnchorManager!.addAnchor(newAnchor);
 
-        final modelFilePath =
-            '${(await getTemporaryDirectory()).path}/rigged.glb';
+      if (didAddAnchor!) {
+        anchor = newAnchor;
 
         // Add node to the anchor
         var newNode = ARNode(
-            type: NodeType.webGLB,
-            uri: modelFilePath,
+            name: "localNode",
+            type: NodeType.localGLTF2,
+            uri: "Models/Chicken_01.gltf",
             scale: vector.Vector3(0.2, 0.2, 0.2),
             position: vector.Vector3(0.0, 0.0, 0.0),
             rotation: vector.Vector4(1.0, 0.0, 0.0, 0.0));
-        bool? didAddNodeToAnchor = await this.arObjectManager!
+
+        bool? didAddNodeToAnchor = await arObjectManager!
             .addNode(newNode, planeAnchor: newAnchor);
+
         if (didAddNodeToAnchor!) {
-          this.node = (newNode);
+          node = newNode;
+          print("Node added successfully.");
+          setState(() {
+            _showFloatingActionButton = true;
+          });
         } else {
-          this.arSessionManager!.onError("Adding Node to Anchor failed");
+          arSessionManager!.onError("Adding Node to Anchor failed");
         }
       } else {
-        this.arSessionManager!.onError("Adding Anchor failed");
+        arSessionManager!.onError("Adding Anchor failed");
       }
-    }
+    // }
   }
 
-  Future<void> onNodeTapped(List<String> nodeNames) async {
-    print("Node has been tapped" + nodeNames[0]);
-    convertTextToSpeech("Hello this is john's business card");
-  }
+  // Future<void> onNodeTapped(List<String> nodeNames) async {
+  //   print("Node has been tapped${nodeNames[0]}");
+  // }
+  //
+  // onPanStarted(String nodeName) {
+  //   print("Started panning node $nodeName");
+  // }
+  //
+  // onPanChanged(String nodeName) {
+  //   print("Continued panning node $nodeName");
+  // }
+  //
+  // onPanEnded(String nodeName, Matrix4 newTransform) {
+  //   print("Ended panning node $nodeName");
+  //   final pannedNode = node;
+  // }
+  //
+  // onRotationStarted(String nodeName) {
+  //   print("Started rotating node $nodeName");
+  // }
+  //
+  // onRotationChanged(String nodeName) {
+  //   print("Continued rotating node $nodeName");
+  // }
+  //
+  // onRotationEnded(String nodeName, Matrix4 newTransform) {
+  //   print("Ended rotating node $nodeName");
+  //   final rotatedNode = node;
+  // }
 
-  onPanStarted(String nodeName) {
-    print("Started panning node " + nodeName);
-  }
+  Future<void> convertTextToSpeech(String message) async {
+    setState(() {
+      _isProcessing = true; // Indicate processing has begun
+    });
 
-  onPanChanged(String nodeName) {
-    print("Continued panning node " + nodeName);
-  }
+    // Prepare HTTP request headers for IBM API authentication
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic ${base64Encode(utf8.encode('apikey:$apiKey'))}',
+    };
 
-  onPanEnded(String nodeName, Matrix4 newTransform) {
-    print("Ended panning node " + nodeName);
-    final pannedNode = this.node;
-  }
+    // Create HTTP request object
+    var request = http.Request('POST', Uri.parse(ibmURL));
+    request.body = json.encode({"text": message, "accept": "audio/wav"});
+    request.headers.addAll(headers);
 
-  onRotationStarted(String nodeName) {
-    print("Started rotating node " + nodeName);
-  }
+    try {
+      http.StreamedResponse response = await request.send();
 
-  onRotationChanged(String nodeName) {
-    print("Continued rotating node " + nodeName);
-  }
+      if (response.statusCode == 200) {
+        // Process successful response
+        var bytes = await response.stream.toBytes();
+        var dir = await getTemporaryDirectory();
+        var file = File("${dir.path}/speech.wav");
 
-  onRotationEnded(String nodeName, Matrix4 newTransform) {
-    print("Ended rotating node " + nodeName);
-    final rotatedNode = this.node;
-  }
-
-    Future<void> convertTextToSpeech(String message) async {
-      setState(() {
-        _isProcessing = true; // Indicate processing has begun
-      });
-
-      // Prepare HTTP request headers for IBM API authentication
-      var headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + base64Encode(utf8.encode('apikey:$apiKey')),
-      };
-
-      // Create HTTP request object
-      var request = http.Request('POST', Uri.parse(ibmURL));
-      request.body = json.encode({"text": message, "accept": "audio/wav"});
-      request.headers.addAll(headers);
-
-      try {
-        http.StreamedResponse response = await request.send();
-
-        if (response.statusCode == 200) {
-          // Process successful response
-          var bytes = await response.stream.toBytes();
-          var dir = await getTemporaryDirectory();
-          var file = File("${dir.path}/speech.wav");
-
-          await file.writeAsBytes(bytes); // Store the audio file
-          await _audioPlayer.play(DeviceFileSource(file.path)); // Play audio
-        } else {
-          // Handle failed request
-          print('Request failed with status code: ${response.statusCode}');
-          print(response.reasonPhrase);
-        }
-      } catch (e) {
-        // Handle errors
-        print('Error occurred: $e');
-        print('Request details: $request');
+        await file.writeAsBytes(bytes); // Store the audio file
+        await _audioPlayer
+            .play(DeviceFileSource(file.path)); // Play audio
+      } else {
+        // Handle failed request
+        print('Request failed with status code: ${response.statusCode}');
+        print(response.reasonPhrase);
       }
-
-      setState(() {
-        _isProcessing = false; // Processing completed
-      });
+    } catch (e) {
+      // Handle errors
+      print('Error occurred: $e');
+      print('Request details: $request');
     }
+
+    setState(() {
+      _isProcessing = false; // Processing completed
+      _showFloatingActionButton = true; // Show FAB after processing
+    });
   }
+
+  Future<void> removeNode() async {
+    arObjectManager?.removeNode(node!);
+  }
+}
