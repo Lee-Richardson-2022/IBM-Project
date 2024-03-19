@@ -1,244 +1,117 @@
 import 'package:flutter/material.dart';
-import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
-import 'package:vector_math/vector_math_64.dart' as vector;
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:io' show Platform;
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:speech_to_text/speech_to_text_provider.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'AR Core Example',
-      home: ARCorePage(),
+    return MaterialApp(
+      home: HomePage(),
     );
   }
 }
 
-class ARCorePage extends StatefulWidget {
-  const ARCorePage({Key? key}) : super(key: key);
-
+class HomePage extends StatefulWidget {
   @override
-  _ARCorePageState createState() => _ARCorePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _ARCorePageState extends State<ARCorePage> {
-  late ArCoreController arCoreController;
-  ArCoreNode? currentNode;
-  double avatarScale = 1.0;
+class _HomePageState extends State<HomePage> {
+  String _transcription = '';
+  stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
 
-  void _onBottonNavTap(int index) {
-    if (index == 2) {
-      _showSettingsDialog();
+  void _listenForCommand() async {
+    if (!_isListening) {
+      setState(() => _isListening = true);
+      bool available = await _speech.initialize(
+        onStatus: (status) => print('onStatus: $status'),
+        onError: (error) => print('onError: $error'),
+      );
+      if (available) {
+        _speech.listen(
+          onResult: (result) async {
+            if (result.finalResult) {
+              try {
+                await _speech.stop();
+                String recognizedWords = result.recognizedWords;
+                String transcript = await transcribeText(recognizedWords);
+                setState(() {
+                  _transcription = transcript;
+                });
+              } catch (e) {
+                print('Error transcribing text: $e');
+                setState(() {
+                  _transcription = 'Error transcribing text: $e';
+                });
+              }
+            }
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      await _speech.stop();
     }
   }
 
+
+  Future<String> transcribeText(String text) async {
+    const String apiKey = '1H4-lq4KgcckeYEU4smtN8Z2Dkbp7s6HvihgNHWEteOb';
+    const String url = 'https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/9485a0d7-792b-42d0-89dd-6be858e72782';
+    var uri = Uri.parse('$url/v1/recognize');
+
+    var response = await http.post(
+      uri,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Basic ${base64Encode(utf8.encode('apikey:$apiKey'))}",
+      },
+      body: jsonEncode({
+        "text": text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var result = jsonDecode(response.body);
+      return result['results'][0]['alternatives'][0]['transcript'];
+    } else {
+      throw Exception('Failed to transcribe text. Status code: ${response.statusCode}');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: ArCoreView(
-              onArCoreViewCreated: _onArCoreViewCreated,
-              enableTapRecognizer: true,
-              enableUpdateListener: true,
+      appBar: AppBar(
+        title: Text('Watson Speech to Text'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Transcription: $_transcription',
+                style: Theme.of(context).textTheme.headline6,
+              ),
             ),
-          ),
-          BottomNavigationBar(
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.credit_card),
-                label: 'History',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.camera_alt),
-                label: 'Camera',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
-              ),
-            ],
-            onTap: _onBottonNavTap,
-          ),
-        ],
+            ElevatedButton(
+              onPressed: _listenForCommand,
+              child: Text(_isListening ? 'Stop Listening' : 'Start Listening'),
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  void _onArCoreViewCreated(ArCoreController controller) {
-    arCoreController = controller;
-    arCoreController.onNodeTap = (name) => onTapHandler(name);
-    arCoreController.onPlaneTap = _onPlaneTapHandler;
-  }
-
-  void _onPlaneTapHandler(List<ArCoreHitTestResult> hits) {
-    if (hits.isNotEmpty) {
-      createAvatar(hits.first.pose.translation, Colors.grey, false);
-    }
-  }
-
-  List<ArCoreNode> createButtons() {
-    final redMaterial = ArCoreMaterial(color: Colors.red, reflectance: 1.0);
-    final redCylinder = ArCoreCylinder(materials: [redMaterial], radius: 0.01, height: 0.05);
-
-    final blueMaterial = ArCoreMaterial(color: Colors.blue, reflectance: 1.0);
-    final blueCylinder = ArCoreCylinder(materials: [blueMaterial], radius: 0.01, height: 0.05);
-
-    final greenMaterial = ArCoreMaterial(color: Colors.green, reflectance: 1.0);
-    final greenCylinder = ArCoreCylinder(materials: [greenMaterial], radius: 0.01, height: 0.05);
-
-    final redButton = ArCoreNode(
-      name: 'redButton',
-      shape: redCylinder,
-      position: vector.Vector3(-0.1, 0, 0),
-      rotation: vector.Vector4(1, 0, 0, 1),
-    );
-
-    final blueButton = ArCoreNode(
-      name: 'blueButton',
-      shape: blueCylinder,
-      position: vector.Vector3(0.1, 0, 0),
-      rotation: vector.Vector4(1, 0, 0, 1),
-    );
-
-    final greenButton = ArCoreNode(
-      name: 'greenButton',
-      shape: greenCylinder,
-      position: vector.Vector3(0, 0.1, 0),
-      rotation: vector.Vector4(1, 0, 0, 1),
-    );
-    return [redButton, blueButton, greenButton];
-  }
-
-  void createAvatar(vector.Vector3 position, Color color, bool withButtons) {
-    final material = ArCoreMaterial(color: color, reflectance: 1.0);
-    final cylinder = ArCoreCylinder(materials: [material], radius: 0.15, height: 0.03);
-    final ArCoreNode newNode;
-    if (withButtons) {
-      newNode = ArCoreNode(
-        name: 'avatar',
-        children: createButtons(),
-        shape: cylinder,
-        position: position,
-        scale: vector.Vector3(avatarScale, avatarScale, avatarScale),
-      );
-    } else {
-      newNode = ArCoreNode(
-        name: 'avatar',
-        shape: cylinder,
-        position: position,
-        scale: vector.Vector3(avatarScale, avatarScale, avatarScale),
-      );
-    }
-
-    if (currentNode != null) {
-      arCoreController.removeNode(nodeName: currentNode!.name);
-    }
-
-    arCoreController.addArCoreNode(newNode);
-    currentNode = newNode;
-  }
-
-  void changeColor(Color color) {
-    arCoreController.removeNode(nodeName: currentNode!.name);
-    createAvatar(currentNode!.position!.value, color, true);
-  }
-
-  void onTapHandler(String name) {
-    switch (name) {
-      case "avatar":
-        createAvatar(currentNode!.position!.value, Colors.grey, true);
-        break;
-      case "redButton":
-        changeColor(Colors.red);
-        break;
-      case "blueButton":
-        changeColor(Colors.blue);
-        break;
-      case "greenButton":
-        changeColor(Colors.green);
-        break;
-    }
-  }
-
-  void _updateAvatarScale() {
-    if (currentNode != null) {
-      arCoreController.removeNode(nodeName: currentNode!.name);
-      createAvatar(currentNode!.position!.value, Colors.grey, true);
-    }
-  }
-
-  void _showSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        bool subtitlesEnabled = false; // Variable to track subtitles option
-        double avatarSize = avatarScale; // Variable to track avatar size
-
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              backgroundColor: Colors.white60, // Set background color to transparent
-              elevation: 0, // Set elevation to 0 to remove shadow
-              title: const Text("Settings"),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: <Widget>[
-                    // Subtitles option
-                    CheckboxListTile(
-                      title: const Text('Subtitles'),
-                      value: subtitlesEnabled,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          subtitlesEnabled = value ?? true;
-                          // Implement subtitle display logic based on the value
-                          // For example: if (subtitlesEnabled) { /* Show subtitles */ }
-                        });
-                      },
-                    ),
-                    // Avatar size label and slider
-
-                    Text(
-                      'Avatar Size: ${avatarSize.toStringAsFixed(2)}', // Display current avatar size
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    Slider(
-                      value: avatarSize,
-                      min: 0.5,
-                      max: 2.0,
-                      onChanged: (value) {
-                        setState(() {
-                          avatarSize = value;
-                          avatarScale = value; // Update the global avatarScale variable
-                          _updateAvatarScale(); // Update avatar scale in AR view
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Close'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    arCoreController.dispose();
-    super.dispose();
-  }
-}
+  }}
