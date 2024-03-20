@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ibm_test/chatbot.dart';
 import 'ar_view.dart';
 import 'qr_scanner.dart';
 
