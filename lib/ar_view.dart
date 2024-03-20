@@ -47,7 +47,7 @@ class _BuildARViewState extends State<BuildARView> {
               onARViewCreated: onARViewCreated,
               planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
             ),
-            if (_nodePlaced) // Conditionally show FAB
+            if (_nodePlaced)
               BuildAutomationWidget(),
             Positioned(
               bottom: 16.0,

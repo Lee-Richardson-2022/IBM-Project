@@ -17,14 +17,14 @@ Future<String?> CallChatGPT(String prompt) async {
       "messages": [
       {
         "role": "system",
-        "content": "You are a helpful assistant that works for the company IBM. To start off please introduce yourself and what your role is at IBM. You will be then be asked questions about IBM and it will be your job to answer them to the best of your ability."
+        "content": "You are a developer that works for the company IBM. You are presenting a pitch to potential clients, to start off please introduce yourself and what your role is at IBM. You will be then be asked questions about IBM and it will be your job to answer them."
       },
       {
         "role": "user",
         "content": "Hello! I am wanting to know about who you work for and how long you have been working with them"
       }
       ],
-      'max_tokens': 50, // Adjust as needed
+      'max_tokens': 100, // Adjust as needed
     },
   );
   try {

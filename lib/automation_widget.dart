@@ -20,7 +20,9 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
         onPressed: () async {
           String? chatbotResponse = await CallChatGPT("Introduce yourself");
           ConvertTextToSpeech(chatbotResponse);
-          ///Function
+          // then listen for speech
+          // then pass text to chatbot
+          //then pass reply to speech and continue
         },
         child: Icon(Icons.play_arrow),
       ),
