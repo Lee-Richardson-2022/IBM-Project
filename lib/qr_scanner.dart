@@ -62,32 +62,6 @@ class _BuildQRScanner extends State<BuildQRScanner> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('QR Scan to AR')),
-      body: const Center(
-        child: Text('Scanning...'), // This text is displayed initially.
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.flash_on, color: Colors.black),
-              onPressed: () {
-                // Placeholder for flashlight functionality or other feature
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.camera_alt, color: Colors.black),
-              onPressed: () {
-                // Placeholder for camera switch functionality or other feature
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+    return const Scaffold();
   }
 }

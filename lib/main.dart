@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ibm_test/chatbot.dart';
 import 'ar_view.dart';
 import 'qr_scanner.dart';
 
@@ -9,35 +11,39 @@ class MyApp extends StatefulWidget {
 
   @override
   State<MyApp> createState() => _MyAppState();
+
 }
 
 class _MyAppState extends State<MyApp> {
-  bool hasData = false; // Variable to track whether data is available
+  bool hasData = true; // Variable to track whether data is available
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          hasData ? const BuildARView() : const BuildQRScanner(),
-
-           BottomNavigationBar(
+    return MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: [
+            hasData ? const Expanded(child: BuildARView()) : const Expanded(
+                child: BuildQRScanner()),
+            BottomNavigationBar(
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.credit_card),
                   label: 'History',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.camera_alt),
-                  label: 'Camera',
+                  icon: Icon(Icons.qr_code),
+                  label: 'Scan qr',
                 ),
                 BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
+                  icon: Icon(Icons.settings),
+                  label: 'Settings',
                 ),
-              ],
-            )
+              ], onTap: NavigationBarFunction,
+            ),
           ],
+        ),
       ),
     );
   }
@@ -48,6 +54,12 @@ class _MyAppState extends State<MyApp> {
       hasData = true; // Set hasData to true when data is scanned
     });
   }
+
+  NavigationBarFunction(int index) {
+    if (index == 1) {
+      setState(() {
+        hasData = false; // Set hasData to true when data is scanned
+      });
+    }
+  }
 }
-
-
