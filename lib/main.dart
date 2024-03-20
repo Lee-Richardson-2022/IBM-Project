@@ -3,7 +3,7 @@ import 'package:ibm_test/chatbot.dart';
 import 'ar_view.dart';
 import 'qr_scanner.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
