@@ -42,7 +42,7 @@ class _BuildARViewState extends State<BuildARView> {
               planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
             ),
             if (_nodePlaced)
-              BuildAutomationWidget(),
+              const BuildAutomationWidget(),
             Positioned(
               bottom: 16.0,
               left: 16.0,
@@ -50,7 +50,7 @@ class _BuildARViewState extends State<BuildARView> {
                 onPressed: () {
                   removeNodeAndAnchor();
                 },
-                child: Icon(Icons.replay),
+                child: const Icon(Icons.replay),
               ),
             ),
           ],

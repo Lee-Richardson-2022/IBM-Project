@@ -3,7 +3,7 @@ import 'text_to_speech.dart';
 import 'chatbot.dart';
 
 class BuildAutomationWidget extends StatefulWidget {
-  BuildAutomationWidget({super.key});
+  const BuildAutomationWidget({super.key});
 
    @override
   State<BuildAutomationWidget> createState() => _AutomationWidgetState();
@@ -24,7 +24,7 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
           // then pass text to chatbot
           //then pass reply to speech and continue
         },
-        child: Icon(Icons.play_arrow),
+        child: const Icon(Icons.play_arrow),
       ),
     );
   }
