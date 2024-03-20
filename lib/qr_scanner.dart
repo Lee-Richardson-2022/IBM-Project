@@ -1,5 +1,4 @@
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'ar_view.dart';
 import 'package:flutter/material.dart';
 
 class BuildQRScanner extends StatefulWidget {
