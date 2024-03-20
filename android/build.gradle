@@ -1,3 +1,15 @@
+buildscript {
+    ext.kotlin_version = '1.8.22' // Use the latest version or the one that matches your project needs
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // Include other classpath definitions
+    }
+}
+
 allprojects {
     repositories {
         google()

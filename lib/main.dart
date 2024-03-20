@@ -1,88 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'ar_page.dart'; // Ensure this file exists and has a proper ARViewPage widget.
+import 'ar_view.dart';
+import 'qr_scanner.dart';
 
 void main() => runApp(const MyApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+
+}
+
+class _MyAppState extends State<MyApp> {
+  bool hasData = true; // Variable to track whether data is available
+
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        scanQR();
-      }
-    });
-  }
-
-  Future<void> scanQR() async {
-    try {
-      final String scanResult = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666',
-        'Cancel',
-        true,
-        ScanMode.QR,
-      );
-
-      if (!mounted) return;
-
-      if (scanResult != '-1' && scanResult == "https://youtu.be/dQw4w9WgXcQ") {
-        await Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const ARCorePage()),
-        );
-      }
-    } catch (e) {
-      // Handle any errors here
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('QR Scan to AR')),
-      body: const Center(
-        child: Text('Scanning...'),
-      ),
-      // Updated BottomAppBar with icons
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white, // White background
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.flash_on, color: Colors.black), // Black icon for contrast
-              onPressed: () {
-                // Implement flashlight toggle functionality
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.camera_alt, color: Colors.black), // Black icon for contrast
-              onPressed: () {
-                // You might want to implement camera switch functionality or another action
-              },
+    return MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: [
+            hasData ? const Expanded(child: BuildARView()) : const Expanded(
+                child: BuildQRScanner()),
+            BottomNavigationBar(
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.credit_card),
+                  label: 'History',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.qr_code),
+                  label: 'Scan qr',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: 'Settings',
+                ),
+              ], onTap: NavigationBarFunction,
             ),
           ],
         ),
       ),
     );
+  }
+
+  // Method to handle data scanned by QR scanner
+  void onDataScanned(String data) {
+    setState(() {
+      hasData = true; // Set hasData to true when data is scanned
+    });
+  }
+
+  NavigationBarFunction(int index) {
+    if (index == 1) {
+      setState(() {
+        hasData = false; // Set hasData to true when data is scanned
+      });
+    }
   }
 }
