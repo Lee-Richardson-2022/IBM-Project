@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<String?> CallChatGPT(String persona,String prompt) async {
-  const apiKey = "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";
+  const apiKey = "";
   const apiUrl = "https://api.openai.com/v1/chat/completions";
 
   final headers = {

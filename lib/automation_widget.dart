@@ -41,7 +41,7 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
             });
           }
         },
-        child: Icon(doneIntro?Icons.play_arrow:Icons.mic),
+        child: Icon(doneIntro?Icons.mic:Icons.play_arrow),
       ),
     );
   }
