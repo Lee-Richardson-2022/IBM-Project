@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-Future<String?> CallChatGPT(String prompt) async {
-  const apiKey = "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";
+Future<String?> CallChatGPT(String persona,String prompt) async {
+  const apiKey = "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";
   const apiUrl = "https://api.openai.com/v1/chat/completions";
 
   final headers = {
@@ -16,11 +16,11 @@ Future<String?> CallChatGPT(String prompt) async {
       "messages": [
       {
         "role": "system",
-        "content": "You are a developer that works for the company IBM. You are presenting a pitch to potential clients, to start off please introduce yourself and what your role is at IBM. You will be then be asked questions about IBM and it will be your job to answer them."
+        "content": "${persona}"
       },
       {
         "role": "user",
-        "content": "Hello! I am wanting to know about who you work for and how long you have been working with them"
+        "content": "${prompt}"
       }
       ],
       'max_tokens': 100, // Adjust as needed

@@ -6,14 +6,14 @@ import 'package:path_provider/path_provider.dart';
 
 
 Future<void> ConvertTextToSpeech(String? text) async {
-  const String apiKey = 'i6dMF2ABNtgoeKxJKW3F88a_DBwtxMf3rOwS7Bde_SI3';
-  const String ibmURL = 'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/c7604c72-6d16-4e92-87b0-1fa408703bdc/v1/synthesize';
-  final AudioPlayer audioPlayer = AudioPlayer();
+  final String apiKey = 'i6dMF2ABNtgoeKxJKW3F88a_DBwtxMf3rOwS7Bde_SI3';
+  final String ibmURL = 'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/c7604c72-6d16-4e92-87b0-1fa408703bdc/v1/synthesize';
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   // Prepare HTTP request headers for IBM API authentication
   var headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Basic ${base64Encode(utf8.encode('apikey:$apiKey'))}',
+    'Authorization': 'Basic ' + base64Encode(utf8.encode('apikey:$apiKey')),
   };
 
   // Create HTTP request object
@@ -31,7 +31,7 @@ Future<void> ConvertTextToSpeech(String? text) async {
       var file = File("${dir.path}/speech.wav");
 
       await file.writeAsBytes(bytes); // Store the audio file
-      await audioPlayer.play(DeviceFileSource(file.path)); // Play audio
+      await _audioPlayer.play(DeviceFileSource(file.path)); // Play audio
     } else {
       // Handle failed request
       print('Request failed with status code: ${response.statusCode}');
@@ -41,6 +41,6 @@ Future<void> ConvertTextToSpeech(String? text) async {
     // Handle errors
     print('Error occurred: $e');
     print('Request details: $request');
-  }
+  };
 }
 
