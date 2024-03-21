@@ -23,7 +23,7 @@ Future<String?> CallChatGPT(String persona,String prompt) async {
         "content": "${prompt}"
       }
       ],
-      'max_tokens': 100, // Adjust as needed
+      'max_tokens': 200, // Adjust as needed
     },
   );
   try {

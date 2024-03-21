@@ -4,17 +4,17 @@ import 'chatbot.dart';
 import 'firebase.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
-
 class BuildAutomationWidget extends StatefulWidget {
-  const BuildAutomationWidget({super.key});
+  const BuildAutomationWidget({Key? key}) : super(key: key);
 
-   @override
+  @override
   State<BuildAutomationWidget> createState() => _AutomationWidgetState();
 }
 
 class _AutomationWidgetState extends State<BuildAutomationWidget> {
-  late String prompt;
-  late bool doneIntro = false;
+  late String prompt = 'Introduce yourself'; // Initialize prompt with an empty string
+  late bool listening = false;
+  String? chatGptPersona;
 
   @override
   Widget build(BuildContext context) {
@@ -23,24 +23,17 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
       right: 16.0,
       child: FloatingActionButton(
         onPressed: () async {
-          // String? chatGptPersona = await returnFirebaseInfo("Description");
-          String chatGptPersona = "You are a elon musk";
-          if (!doneIntro){
-            String? chatbotResponse = await CallChatGPT(chatGptPersona!, "Introduce yourself");
-            await ConvertTextToSpeech(chatbotResponse);
+          if (prompt != "") {
+            String? chatbotResponse = await CallChatGPT(chatGptPersona!, prompt);
+            // await ConvertTextToSpeech(chatbotResponse);
             setState(() {
-              doneIntro = true;
+              prompt = ''; // Clear the prompt after sending it to the chatbot
             });
           } else {
-            await listenForInput();
-            String? chatbotResponse = await CallChatGPT(chatGptPersona!, prompt);
-            await ConvertTextToSpeech(chatbotResponse);
-            setState(() {
-              prompt = "";
-            });
-          }
+              await listenForInput();
+            }
         },
-        child: Icon(doneIntro?Icons.mic:Icons.play_arrow),
+        child: Icon(prompt != "" ? Icons.play_arrow : Icons.mic),
       ),
     );
   }
@@ -66,7 +59,7 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
           // Return the recognized text
           setState(() {
             prompt = result.recognizedWords;
-          });;
+          });
         },
       );
     } else {
@@ -77,13 +70,11 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    initChatPersona();
     super.initState();
   }
 
-  @override
-  void reassemble() {
-    // TODO: implement reassemble
-    super.reassemble();
+  Future<void> initChatPersona() async {
+    chatGptPersona = await returnFirebaseInfo("Description");
   }
 }
