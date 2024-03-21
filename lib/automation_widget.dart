@@ -6,7 +6,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 
 class BuildAutomationWidget extends StatefulWidget {
-  BuildAutomationWidget({super.key});
+  const BuildAutomationWidget({super.key});
 
    @override
   State<BuildAutomationWidget> createState() => _AutomationWidgetState();
@@ -23,8 +23,8 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
       right: 16.0,
       child: FloatingActionButton(
         onPressed: () async {
-          String? chatGptPersona = await returnFirebaseInfo("Description");
-
+          // String? chatGptPersona = await returnFirebaseInfo("Description");
+          String chatGptPersona = "You are a elon musk";
           if (!doneIntro){
             String? chatbotResponse = await CallChatGPT(chatGptPersona!, "Introduce yourself");
             await ConvertTextToSpeech(chatbotResponse);
@@ -45,13 +45,7 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
     );
   }
 
-  void updatePrompt(String newPrompt) {
-    setState(() {
-      this.prompt = newPrompt;
-    });
-  }
-
-  Future<String?> listenForInput() async {
+  Future<void> listenForInput() async {
     // Initialize the speech to text plugin
     stt.SpeechToText speech = stt.SpeechToText();
 
@@ -78,7 +72,18 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
     } else {
       // Handle the case when the plugin is not available
       print('Speech recognition not available');
-      return null;
     }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void reassemble() {
+    // TODO: implement reassemble
+    super.reassemble();
   }
 }
