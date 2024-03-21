@@ -13,7 +13,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool hasData = true; // Variable to track whether data is available
+  bool hasData = false; // Variable to track whether data is available
 
 
   @override

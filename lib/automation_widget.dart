@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'text_to_speech.dart';
 import 'chatbot.dart';
+import 'firebase.dart';
 
 class BuildAutomationWidget extends StatefulWidget {
   BuildAutomationWidget({super.key});
@@ -18,8 +19,10 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
       right: 16.0,
       child: FloatingActionButton(
         onPressed: () async {
-          String? chatbotResponse = await CallChatGPT("Introduce yourself");
-          ConvertTextToSpeech(chatbotResponse);
+          // String? chatbotResponse = await CallChatGPT("Introduce yourself");
+          // ConvertTextToSpeech(chatbotResponse);
+          String? database = await returnFirebaseInfo("Description");
+          ConvertTextToSpeech(database);
           // then listen for speech
           // then pass text to chatbot
           //then pass reply to speech and continue

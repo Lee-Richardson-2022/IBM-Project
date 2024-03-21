@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "969628663426",
+    "project_id": "ibm-database-2",
+    "storage_bucket": "ibm-database-2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969628663426:android:a3fa42c4d1f9e7f12dbe9b",
+        "android_client_info": {
+          "package_name": "com.example.ibm_test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT3jXJSI9faDzoBY0cZ-aXOdS7ZcXUDaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969628663426:android:bf800db728b868642dbe9b",
+        "android_client_info": {
+          "package_name": "com.example.ibm_text_to_speech_database"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT3jXJSI9faDzoBY0cZ-aXOdS7ZcXUDaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin" // Ensure this plugin is applied for Flutter integration.
+    id 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -61,6 +62,9 @@ dependencies {
     implementation 'com.google.ar:core:1.41.0'
     implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.15.0'
     implementation 'com.google.ar.sceneform:core:1.15.0'
+    implementation platform('com.google.firebase:firebase-bom:32.7.4')
+    implementation 'com.google.firebase:firebase-analytics'
+
 }
 
 
