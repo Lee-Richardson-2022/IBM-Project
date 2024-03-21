@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'text_to_speech.dart';
 import 'chatbot.dart';
 import 'firebase.dart';
-import 'speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 
