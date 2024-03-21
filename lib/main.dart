@@ -13,7 +13,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool hasData = false; // Variable to track whether data is available
+  bool hasData = true;
 
 
   @override
@@ -44,13 +44,6 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
-  }
-
-  // Method to handle data scanned by QR scanner
-  void onDataScanned(String data) {
-    setState(() {
-      hasData = true; // Set hasData to true when data is scanned
-    });
   }
 
   NavigationBarFunction(int index) {

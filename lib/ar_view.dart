@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
 import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
@@ -41,7 +41,7 @@ class _BuildARViewState extends State<BuildARView> {
               onARViewCreated: onARViewCreated,
               planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
             ),
-            if (_nodePlaced)
+            if (true)
               BuildAutomationWidget(),
             Positioned(
               bottom: 16.0,

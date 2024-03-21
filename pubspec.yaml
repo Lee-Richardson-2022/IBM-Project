@@ -32,19 +32,22 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  vector_math: ^2.1.0 # Check for the latest version
-  flutter_barcode_scanner: ^2.0.0
+  vector_math: ^2.1.0
+
   model_viewer_plus: ^1.6.0
   ar_flutter_plugin: ^0.7.3
+
   http: ^1.2.0
   audioplayers: ^5.2.1
   path_provider: ^2.1.2
   archive: ^3.1.2
   speech_to_text: ^6.6.0
-  chat_gpt_flutter: ^1.0.16
+
   firebase_core: ^2.27.1
   cloud_firestore: ^4.15.8
+
   qr_code_scanner: ^1.0.1
+  flutter_barcode_scanner: ^2.0.0
 
 
 
