@@ -6,8 +6,8 @@ import 'package:path_provider/path_provider.dart';
 
 
 Future<void> ConvertTextToSpeech(String? text) async {
-  const String apiKey = 'i6dMF2ABNtgoeKxJKW3F88a_DBwtxMf3rOwS7Bde_SI3';
-  const String ibmURL = 'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/c7604c72-6d16-4e92-87b0-1fa408703bdc/v1/synthesize';
+  const String apiKey = 'Flq_384M-Mhuq7Mt2c0or0AOsdqyfeoMeHF3zbq9oxCv';
+  const String ibmURL = 'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/a7529224-f493-4701-9b25-f82ca13233ca/v1/synthesize';
   final AudioPlayer audioPlayer = AudioPlayer();
 
   // Prepare HTTP request headers for IBM API authentication

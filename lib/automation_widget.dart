@@ -25,7 +25,7 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
         onPressed: () async {
           if (prompt != "") {
             String? chatbotResponse = await CallChatGPT(chatGptPersona!, prompt);
-            // await ConvertTextToSpeech(chatbotResponse);
+            await ConvertTextToSpeech(chatbotResponse);
             setState(() {
               prompt = ''; // Clear the prompt after sending it to the chatbot
             });
