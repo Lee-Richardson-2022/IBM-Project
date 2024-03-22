@@ -43,16 +43,17 @@ class _BuildARViewState extends State<BuildARView> {
         ),
         if (_nodePlaced)
           BuildAutomationWidget(),
-        Positioned(
-          bottom: 16.0,
-          left: 16.0,
-          child: FloatingActionButton(
-            onPressed: () {
-              removeNodeAndAnchor();
-            },
-            child: Icon(Icons.replay),
+        if (_nodePlaced)
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            child: FloatingActionButton(
+              onPressed: () {
+                removeNodeAndAnchor();
+              },
+              child: Icon(Icons.replay),
+            ),
           ),
-        ),
       ],
     );
   }
