@@ -1,14 +1,17 @@
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
+// Add a callback function to handle the data scanned from QR code
 class BuildQRScanner extends StatefulWidget {
-  const BuildQRScanner({super.key});
+  final Function(String) onDataScanned; // Callback to pass scanned data
+
+  const BuildQRScanner({super.key, required this.onDataScanned});
 
   @override
-  State<BuildQRScanner> createState() => _BuildQRScanner();
+  State<BuildQRScanner> createState() => _BuildQRScannerState();
 }
 
-class _BuildQRScanner extends State<BuildQRScanner> {
+class _BuildQRScannerState extends State<BuildQRScanner> {
   @override
   void initState() {
     super.initState();
@@ -21,24 +24,22 @@ class _BuildQRScanner extends State<BuildQRScanner> {
 
   Future<void> scanQR() async {
     try {
+      // Start scanning for QR code
       final String scanResult = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666',
-        'Cancel',
-        true,
-        ScanMode.QR,
+        '#ff6666', // Red line color
+        'Cancel', // Cancel button text
+        true, // Whether to show flash icon
+        ScanMode.QR, // QR scanning mode
       );
 
-      if (!mounted) return;
+      // Proceed only if a valid QR code is scanned and the widget is still mounted
+      if (!mounted || scanResult == '-1') return;
 
-      if (scanResult != '-1' && scanResult == "https://youtu.be/dQw4w9WgXcQ") {
-        await Future.delayed(const Duration(milliseconds: 500)); // Allow time for the camera to be released.
-        // await Navigator.of(context).push(
-        //   // MaterialPageRoute(builder: (context) => const ObjectGesturesWidget()),
-        // );
-
-      }
+      // Use the callback to pass the scanned data back
+      widget.onDataScanned(scanResult);
     } catch (e) {
       if (!mounted) return;
+      // Show error if something goes wrong
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -49,7 +50,7 @@ class _BuildQRScanner extends State<BuildQRScanner> {
               TextButton(
                 child: const Text('OK'),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
                 },
               ),
             ],
@@ -61,6 +62,11 @@ class _BuildQRScanner extends State<BuildQRScanner> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    // Simple scaffold to show when the scanner is not actively scanning
+    return Scaffold(
+      body: Center(
+        child: Text(''), // Placeholder text
+      ),
+    );
   }
 }
