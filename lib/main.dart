@@ -26,15 +26,10 @@ class _MyAppState extends State<MyApp> {
                   ? BuildARView(modelIdentifier: modelIdentifier)
                   : BuildQRScanner(
                 onDataScanned: (String data) async {
-                  await Future.delayed(const Duration(seconds: 1)); // Delay for better user experience
+                  await Future.delayed(const Duration(seconds: 1));
                   if (mounted) {
                     setState(() {
-                      // Check the scanned data and set the model identifier accordingly
-                      if (data == "https://youtu.be/dQw4w9WgXcQ") {
-                        modelIdentifier = 'model1'; // Set to your specific model identifier for the link
-                      } else {
-                        modelIdentifier = 'defaultModel'; // Fallback or default model identifier
-                      }
+                      modelIdentifier = data;
                       hasData = true;
                     });
                   }

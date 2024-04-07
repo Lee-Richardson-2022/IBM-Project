@@ -15,9 +15,9 @@ import 'automation_widget.dart';
 
 
 class BuildARView extends StatefulWidget {
-  final String modelIdentifier;  // Add this line
+  final String modelIdentifier;
 
-  const BuildARView({super.key, required this.modelIdentifier});  // Modify this line
+  const BuildARView({super.key, required this.modelIdentifier});
 
   @override
   State<BuildARView> createState() => _BuildARViewState();
@@ -42,7 +42,7 @@ class _BuildARViewState extends State<BuildARView> {
           planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
         ),
         if (_nodePlaced)
-          BuildAutomationWidget(),
+          BuildAutomationWidget(modelIdentifier: widget.modelIdentifier),
         if (_nodePlaced)
           Positioned(
             bottom: 16.0,
@@ -90,11 +90,14 @@ class _BuildARViewState extends State<BuildARView> {
         // Determine which model to load based on 'modelIdentifier'
         String modelUri;
         switch (widget.modelIdentifier) {
-          case 'model1':
-            modelUri = 'Models/Android.gltf';  // Specify the actual model file paths
+          case 'Avatar 1':
+            modelUri = 'Models/human.gltf';  // Specify the actual model file paths
             break;
-          case 'model2':
+          case 'Avatar 2':
             modelUri = 'Models/Android.gltf';
+            break;
+          case "Chicken":
+            modelUri = "Models/Chicken_01.gltf";
             break;
         // Add more cases as needed
           default:
@@ -104,7 +107,7 @@ class _BuildARViewState extends State<BuildARView> {
         var newNode = ARNode(
             type: NodeType.localGLTF2,
             uri: modelUri,
-            scale: vector.Vector3(0.05, 0.05, 0.05),
+            scale: vector.Vector3(0.1, 0.1, 0.1),
             position: vector.Vector3(0.0, 0.0, 0.0),
             rotation: vector.Vector4(1.0, 0.0, 0.0, 0.0));
         bool? didAddNodeToAnchor = await arObjectManager!

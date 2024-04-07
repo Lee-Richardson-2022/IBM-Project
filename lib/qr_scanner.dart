@@ -65,7 +65,7 @@ class _BuildQRScannerState extends State<BuildQRScanner> {
     // Simple scaffold to show when the scanner is not actively scanning
     return Scaffold(
       body: Center(
-        child: Text('Scanning...'), // Placeholder text
+        child: Text(''), // Placeholder text
       ),
     );
   }

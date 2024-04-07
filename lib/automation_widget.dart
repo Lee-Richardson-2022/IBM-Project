@@ -5,7 +5,8 @@ import 'firebase.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class BuildAutomationWidget extends StatefulWidget {
-  const BuildAutomationWidget({Key? key}) : super(key: key);
+  final String modelIdentifier;
+  const BuildAutomationWidget({Key? key, required this.modelIdentifier}) : super(key: key);
 
   @override
   State<BuildAutomationWidget> createState() => _AutomationWidgetState();
@@ -24,7 +25,6 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
       child: FloatingActionButton(
         onPressed: () async {
           if (prompt != "") {
-            chatGptPersona = "You are elon musk";
             String? chatbotResponse = await CallChatGPT(chatGptPersona!, prompt);
             await ConvertTextToSpeech(chatbotResponse);
             setState(() {
@@ -76,6 +76,6 @@ class _AutomationWidgetState extends State<BuildAutomationWidget> {
   }
 
   Future<void> initChatPersona() async {
-    chatGptPersona = await returnFirebaseInfo("Description");
+    chatGptPersona = await returnFirebaseInfo(widget.modelIdentifier);
   }
 }
