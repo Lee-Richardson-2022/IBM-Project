@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 
 Future<String?> CallChatGPT(String persona,String prompt) async {
   const apiUrl = "https://api.openai.com/v1/chat/completions";
+  const apiKey = ""; //API hidden to keep it a secret
 
   final headers = {
     'Content-Type': 'application/json',
